@@ -436,4 +436,27 @@ require('./build_pattern_deck_more.js')(CTX);
 require('./build_pattern_deck_more2.js')(CTX);
 require('./build_example_deck.js')(CTX);
 
-pres.writeFile({ fileName: OUT }).then(f => console.log('written', f));
+// データラベルの色を系列ごとに決め直す（G-5：濃い塗りの内側は白、淡い塗りと棒の外側は黒）
+// pptxgenjs はラベル色をグラフ全体で1色しか指定できないため、書き出し後に系列単位で直す
+const DARK = ['000F78', '595959', '7F7F7F', '404040', '000000'];
+function fixLabelColors(xml) {
+  const stacked = /<c:grouping val="(stacked|percentStacked)"\/>/.test(xml);
+  return xml.replace(/<c:ser>[\s\S]*?<\/c:ser>/g, ser => {
+    const fill = ser.match(/<c:spPr><a:solidFill><a:srgbClr val="([0-9A-Fa-f]{6})"/);
+    if (!fill || !/<c:dLbls>[\s\S]*<c:showVal val="1"\/>/.test(ser)) return ser;
+    const pos = ser.match(/<c:dLblPos val="(\w+)"\/>/);
+    const inside = pos ? ['ctr', 'inEnd', 'inBase'].includes(pos[1]) : stacked;
+    const color = inside && DARK.includes(fill[1].toUpperCase()) ? WHITE : BLACK;
+    return ser.replace(/(<c:dLbls>[\s\S]*?<a:defRPr[^>]*><a:solidFill><a:srgbClr val=")[0-9A-Fa-f]{6}/, `$1${color}`);
+  });
+}
+
+pres.write({ outputType: 'nodebuffer' })
+  .then(buf => require('jszip').loadAsync(buf))
+  .then(async zip => {
+    for (const name of Object.keys(zip.files).filter(n => /^ppt\/charts\/chart\d+\.xml$/.test(n))) {
+      zip.file(name, fixLabelColors(await zip.file(name).async('string')));
+    }
+    await require('fs').promises.writeFile(OUT, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
+    console.log('written', OUT);
+  });

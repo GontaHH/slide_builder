@@ -6,6 +6,37 @@ PALETTE = {"000F78", "000000", "595959", "7F7F7F", "BFBFBF", "E7E6E6", "F2F2F2",
 PLACEHOLDER = re.compile(r"◯◯|○○|〇〇|XX|ＸＸ|ダミー|見本|lorem|TBD|テキストを入力|【(?!要確認)[^】]{1,15}】")
 SMALL_OK = ("注", "出所", "（", "(", "縦軸", "横軸", "【補足", "補足", "※")
 
+DARK = {"000F78", "595959", "7F7F7F", "404040", "000000"}
+CNS = {"c": "http://schemas.openxmlformats.org/drawingml/2006/chart", "a": "http://schemas.openxmlformats.org/drawingml/2006/main"}
+
+def zen_len(t):
+    """全角換算の字数（半角英数・記号は0.55字）。2行に収まるかの目安に使う。"""
+    return sum(0.55 if ord(c) < 0x2000 else 1 for c in t)
+
+def label_contrast(chart_part):
+    """グラフのデータラベルの色と系列の塗りの対比を点検する（濃い塗りの内側ラベルは白、淡い塗りは黒）。"""
+    root = etree.fromstring(chart_part.blob)
+    bad = []
+    for ser in root.iter("{%s}ser" % CNS["c"]):
+        fill = ser.find("c:spPr/a:solidFill/a:srgbClr", CNS)
+        d = ser.find("c:dLbls", CNS)
+        if fill is None or d is None or d.find("c:showVal", CNS) is None or d.find("c:showVal", CNS).get("val") != "1":
+            continue
+        pos = d.find("c:dLblPos", CNS)
+        if pos is None:
+            pos = ser.getparent().find("c:dLbls/c:dLblPos", CNS)
+        if pos is None:
+            g = ser.getparent().find("c:grouping", CNS)
+            inside = g is not None and g.get("val") in ("stacked", "percentStacked")
+        else:
+            inside = pos.get("val") in ("ctr", "inEnd", "inBase")
+        clr = d.find(".//c:txPr//a:defRPr/a:solidFill/a:srgbClr", CNS)
+        lc = (clr.get("val") if clr is not None else "000000").upper()
+        fc = fill.get("val").upper()
+        if inside and fc in DARK and lc != "FFFFFF": bad.append(f"濃い塗り#{fc}に#{lc}のラベル")
+        if (not inside or fc not in DARK) and lc == "FFFFFF": bad.append(f"淡い塗り・外側に白ラベル（#{fc}）")
+    return bad
+
 def main(path, sample=False):
     prs = Presentation(path)
     H = prs.slide_height
@@ -22,6 +53,8 @@ def main(path, sample=False):
         if "outerShdw" in xml or "gradFill" in xml or "sp3d" in xml: fails.append((i, "影・グラデーション・3D"))
         msg, body_chars = None, 0
         for sh in s.shapes:
+            if getattr(sh, "has_chart", False) and sh.has_chart:
+                for b in label_contrast(sh.chart.part): fails.append((i, f"データラベルの対比：{b}"))
             if not sh.has_text_frame: continue
             t = sh.text_frame.text.strip()
             if not t: continue
@@ -40,6 +73,7 @@ def main(path, sample=False):
             n = len(msg)
             if n < 55: warns.append((i, f"メッセージが短い（{n}字）：2行を埋めているか"))
             if n > 80: fails.append((i, f"メッセージが長い（{n}字）：3行になる恐れ"))
+            elif zen_len(msg) > 69: warns.append((i, f"メッセージが全角換算{zen_len(msg):.0f}字：3行になる恐れ（66字以内が目安）"))
             if re.match(r"^(この|その|これ|それ)", msg): fails.append((i, "メッセージが他ページを指示語で参照"))
             if re.match(r"^[^。]{1,12}[：:]", msg): fails.append((i, "メッセージに「見出し：」の前置き"))
             if re.search(r"(です|ます)。?$", msg): fails.append((i, "メッセージが「です・ます」調"))
