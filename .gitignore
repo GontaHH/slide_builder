@@ -1,0 +1,10 @@
+# 他社資料・作業ファイルはリポジトリに入れない
+sources/
+pages/
+local/
+*.pdf
+*.png
+*.jpg
+~$*
+.DS_Store
+node_modules/
