@@ -2,11 +2,13 @@ import sys, re
 from pptx import Presentation
 from lxml import etree
 
-PALETTE = {"000F78", "000000", "595959", "7F7F7F", "BFBFBF", "E7E6E6", "F2F2F2", "FFFFFF", "D9D9D9", "404040", "A6A6A6"}
+# 指定色（rules/slide-rules.md B-3）：Navy・Blue1〜5・Gray1〜2・White・文字色・反対色
+PALETTE = {"000F78", "3C64AA", "83A0D3", "72DFF0", "E0EEF8", "C1DDF1", "CCCCCC", "7F7F7F", "FFFFFF", "3F3F3F", "D73232"}
+ACCENT_RED = "D73232"
 PLACEHOLDER = re.compile(r"◯◯|○○|〇〇|XX|ＸＸ|ダミー|見本|lorem|TBD|テキストを入力|【(?!要確認)[^】]{1,15}】")
 SMALL_OK = ("注", "出所", "（", "(", "縦軸", "横軸", "【補足", "補足", "※")
 
-DARK = {"000F78", "595959", "7F7F7F", "404040", "000000"}
+DARK = {"000F78", "7F7F7F", "3C64AA", "3F3F3F"}
 CNS = {"c": "http://schemas.openxmlformats.org/drawingml/2006/chart", "a": "http://schemas.openxmlformats.org/drawingml/2006/main"}
 
 def zen_len(t):
@@ -46,8 +48,8 @@ def main(path, sample=False):
         # 色：パレット外
         for c in set(re.findall(r'srgbClr val="([0-9A-Fa-f]{6})"', xml)):
             c = c.upper()
-            if c == "C00000": warns.append((i, "赤(#C00000)を使用：悪化そのものがメッセージか確認"))
-            elif c not in PALETTE: fails.append((i, f"パレット外の色 #{c}"))
+            if c == ACCENT_RED: warns.append((i, "反対色(#D73232)を使用：悪化・未達そのものがメッセージか確認"))
+            if c not in PALETTE: fails.append((i, f"パレット外の色 #{c}"))
         # 装飾
         if 'prst="roundRect"' in xml: fails.append((i, "角丸四角形"))
         if "outerShdw" in xml or "gradFill" in xml or "sp3d" in xml: fails.append((i, "影・グラデーション・3D"))

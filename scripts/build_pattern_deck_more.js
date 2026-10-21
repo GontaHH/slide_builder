@@ -2,7 +2,7 @@
 // Jinba consulting-pptx-skill の型カタログ（62型）と外資系コンサルの公開資料の作法を参考に、
 // 既存20型で不足していた「構造で通す」「進め方・計画」「提示・締め」「数字で証明（シナリオ・感度）」を補う。
 module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
-  const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y } = C;
+  const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const tri = (s, x, y, w, h, color) => s.addShape(pres.shapes.ISOSCELES_TRIANGLE, { x, y, w, h, rotate: 90, fill: { color: color || G2 }, line: { type: 'none' } });
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
   const cell = (t, o) => ({ text: t, options: Object.assign({ fontFace: F, fontSize: 14, valign: 'middle', color: BLACK, }, o) });
@@ -248,7 +248,7 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
   {
     const s = frame('P32', '5　ご判断いただきたい事項', '本日は【論点】について【案B】の採用をご判断いただきたい。【案B】は費用と効果の釣り合いが最も良く、【年度】に効果が出る', null, null,
       '使う場面：会議で判断を求める。決めてほしいこと・選択肢と推奨・判断に必要な前提・決めた後の動きを1枚に。推奨案と「決めてほしいこと」だけ紺。依頼や合意事項がない資料では使わない。\n差し替え：論点、案、推奨理由、前提、期限。');
-    s.addShape(pres.shapes.RECTANGLE, { x: L, y: BODY_Y, w: W - 0.9, h: 0.75, fill: { color: NAVY, transparency: 90 }, line: { color: NAVY, width: 1.25 } });
+    s.addShape(pres.shapes.RECTANGLE, { x: L, y: BODY_Y, w: W - 0.9, h: 0.75, fill: { color: BLUE5 }, line: { color: NAVY, width: 1.25 } });
     txt(s, '決めていただきたいこと', { x: L + 0.2, y: BODY_Y, w: 2.6, h: 0.75, valign: 'middle', bold: true, color: NAVY });
     txt(s, '【論点】について、【案B】を採用し、【時期】に着手すること', { x: L + 2.9, y: BODY_Y, w: W - 4.0, h: 0.75, valign: 'middle', bold: true, color: NAVY });
     const lw = 5.6;
