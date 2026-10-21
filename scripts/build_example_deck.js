@@ -1,13 +1,14 @@
 // 通しの完成例：架空の地方鉄道「みなと鉄道」の運営形態の見直し（24枚）
 // 路線・数値はすべて架空。数値は互いに整合するよう設計し、計算値は検算済み（docs/example-calc.md 参照）。
-module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
+module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const SRC = '注）路線・数値はすべて架空の完成例\n出所）架空のデータを基に作成';
   const OPT = (src) => ({ sticker: '架空の例', rawNotes: true, source: src || SRC });
   const N = (type, ev, memo) => `完成例（架空）\n使用した型：${type}\nエビデンスID：${ev}${memo ? '\n' + memo : ''}`;
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
   const cell = (t, o) => ({ text: t, options: Object.assign({ fontFace: F, fontSize: 14, valign: 'middle', color: BLACK }, o) });
-  const bottom = (c, w) => [{ type: 'none' }, { type: 'none' }, { pt: w || 0.5, color: c || G4 }, { type: 'none' }];
+  const bottom = (c, w) => [{ type: 'none' }, { type: 'none' }, { pt: w || 0.75, color: c || G4 }, { type: 'none' }];
+  const none = [{ type: 'none' }, { type: 'none' }, { type: 'none' }, { type: 'none' }];
   const box = (s, x, y, w, h, t, key, o) => { rect(s, x, y, w, h, { line: { color: key ? NAVY : G3, width: key ? 1.5 : 0.75 } }); txt(s, t, Object.assign({ x: x + 0.12, y, w: w - 0.24, h, valign: 'middle', align: 'center', bold: key, color: key ? NAVY : BLACK }, o || {})); };
   const CH = ['1　現状：利用と沿線の変化', '2　課題：収支悪化の構造', '3　打ち手：運営形態の選択', '4　実行計画とご判断いただきたい事項'];
 
@@ -27,7 +28,7 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     txt(s, '完成例', { x: 0.8, y: 2.2, w: 9, h: 0.5, fontSize: 18, color: G1 });
     txt(s, '架空の地方鉄道「みなと鉄道」の運営形態の見直し', { x: 0.8, y: 2.75, w: 9.5, h: 0.8, fontSize: 28, bold: true, color: NAVY });
     line(s, 0.8, 3.7, 9.2, 0, G3, 0.75);
-    txt(s, '型の見本（P01〜P55）を組み合わせて、表紙から判断事項までを通した24枚の完成例。\nメッセージラインのつながり、章の切り替え、エグゼクティブサマリーと本文の対応を確かめるための手本として使う。\n路線・数値はすべて架空。数値は互いに整合するよう設計している。', { x: 0.8, y: 3.9, w: 9.4, h: 1.6, fontSize: 14, color: G1 });
+    txt(s, '型の見本を組み合わせて、表紙から判断事項までを通した24枚の完成例。\nメッセージラインのつながり、章の切り替え、エグゼクティブサマリーと本文の対応を確かめるための手本として使う。\n路線・数値はすべて架空。数値は互いに整合するよう設計している。', { x: 0.8, y: 3.9, w: 9.4, h: 1.6, fontSize: 14, color: G1 });
     s.addNotes('使用した型：P02（部扉）\n完成例の部扉。案件で使う場合は削除する。');
   }
 
@@ -49,41 +50,41 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     const rows = [['現状', '輸送人員は10年で25%減り、年158万人となった', '通学の減少が大きく、沿線人口は2050年までに3割減る見通し'],
       ['課題', '赤字は10年で3.1億円増え、年5.2億円に拡大した', '増加分の6割は運賃収入の減少。黒字化には輸送人員1.6倍が必要'],
       ['打ち手', '3案のうち上下分離が、負担と利便性の両面で最も優れる', '自治体の実質負担は年2.2億円で、現行の補填の3分の1にとどまる']];
-    let y = 1.62;
-    rows.forEach(([k, a, b]) => {
-      txt(s, k, { x: L, y, w: 1.1, h: 0.6, bold: true, color: G1 });
-      txt(s, a, { x: L + 1.25, y, w: W - 1.25, h: 0.32, bold: true });
-      txt(s, b, { x: L + 1.25, y: y + 0.36, w: W - 1.25, h: 0.32, color: G1 });
-      line(s, L, y + 0.85, W, 0, G4, 0.75);
-      y += 1.02;
+    let y = 1.66;
+    rows.forEach(([k, a, b], i) => {
+      txt(s, k, { x: L, y: y + 0.06, w: 1.1, h: 0.34, bold: true, color: G1 });
+      txt(s, a, { x: L + 1.3, y: y + 0.06, w: W - 1.3, h: 0.34, bold: true });
+      txt(s, b, { x: L + 1.3, y: y + 0.46, w: W - 1.3, h: 0.34, color: G1 });
+      if (i < rows.length - 1) rowRule(s, L, y + 1.15, W);
+      y += 1.27;
     });
-    s.addShape(pres.shapes.RECTANGLE, { x: L, y: y + 0.12, w: W, h: 1.4, fill: { color: BLUE5 }, line: { color: NAVY, width: 1.5 } });
-    txt(s, '提言', { x: L + 0.2, y: y + 0.3, w: 1.0, h: 0.3, bold: true, color: NAVY });
-    txt(s, '上下分離（案B）を基本方針とし、2026年度に法定協議会を設けて実施計画を策定する。\n2028年4月の移行を目指し、並行して増収策で鉄道会社の収支を黒字にする', { x: L + 1.25, y: y + 0.3, w: W - 1.45, h: 1.05, bold: true, color: NAVY });
+    line(s, L, y + 0.05, W, 0, NAVY, 1.5);
+    txt(s, '提言', { x: L, y: y + 0.23, w: 1.1, h: 0.32, bold: true, color: NAVY });
+    txt(s, '上下分離（案B）を基本方針とし、2026年度に法定協議会を設けて実施計画を策定する。2028年4月の移行を目指し、並行して増収策で鉄道会社の収支を黒字にする', { x: L + 1.3, y: y + 0.23, w: W - 1.3, h: 1.0, bold: true, color: NAVY });
   }
 
   // ---------- E03 全体マップ ----------
   {
-    const s = frame('EX', '目次', '本報告は「どの運営形態を選ぶべきか」に4章で答える。結論を左右するのは第3章の運営形態の比較であり、ここに最も紙幅を割く', '本報告の構成', null,
+    const s = frame('EX', '0　全体像', '本報告は「どの運営形態を選ぶべきか」に4章で答える。結論を左右するのは第3章の運営形態の比較であり、ここに最も紙幅を割く', '本報告の構成', null,
       N('P34 全体マップ', '―'), OPT(' '));
     const data = [['章', '答える問い', '主な分析', 'ページ'].map((h, j) => cell(h, { bold: true, align: j === 3 ? 'center' : 'left', border: bottom(G2, 1) }))]
       .concat([['1　現状', '利用と沿線はどう変わったか', '輸送人員・利用者構成・人口推計・住民アンケート', '5–9'], ['2　課題', 'なぜ赤字が拡大したか', '要因分解・費用比較・計算ロジック・感度分析', '10–14'], ['3　打ち手', 'どの運営形態を選ぶべきか', '3案の評価・上下分離の仕組み・負担比較・増収策', '15–19'], ['4　実行計画', 'いつ何を決め、何をするか', 'ロードマップ・効果・リスク・判断事項', '20–24']]
-        .map((r, i) => r.map((c, j) => cell(c, { align: j === 3 ? 'center' : 'left', bold: i === 2 && j < 2, color: i === 2 ? NAVY : BLACK, fontFace: j === 3 ? 'Arial' : F, border: bottom() }))));
-    s.addTable(data, { x: L, y: 2.15, w: W, colW: [1.9, 3.3, W - 6.4, 1.2], rowH: [0.45, 0.85, 0.85, 0.85, 0.85] });
+        .map((r, i) => r.map((c, j) => cell(c, { align: j === 3 ? 'center' : 'left', bold: i === 2 && j < 2, color: i === 2 ? NAVY : BLACK, fontFace: j === 3 ? 'Arial' : F, border: i < 3 ? bottom() : none }))));
+    s.addTable(data, { x: L, y: 2.15, w: W, colW: [1.9, 3.3, W - 6.4, 1.2], rowH: [0.45, 1.0, 1.0, 1.0, 1.0] });
   }
 
   // ---------- E04 調査の概要 ----------
   {
-    const s = frame('EX', '目次', '結論は、ヒアリング32件、住民アンケート1,200件、10年分の運行・決算データの3つの調査に基づき、定量と定性の両面で裏付けている', '調査の概要', null,
+    const s = frame('EX', '0　全体像', '結論は、ヒアリング32件、住民アンケート1,200件、10年分の運行・決算データの3つの調査に基づき、定量と定性の両面で裏付けている', '調査の概要', null,
       N('P49 調査の土台', 'E-00'), OPT());
-    const cw = (W - 0.6) / 3;
-    [['関係者ヒアリング', '32', '件', '沿線3市・県・事業者・学校・\n利用者団体（2026年4〜6月）', false], ['沿線住民アンケート', '1,200', '件', '無作為抽出3,000人に郵送\n回収率40%（2026年5月）', true], ['運行・決算データ', '10', '年分', '駅別乗降・定期券種別・\n費目別決算（2014〜2024年度）', false]].forEach(([n, v, u, d, key], i) => {
-      const x = L + i * (cw + 0.3);
-      txt(s, n, { x, y: 2.15, w: cw, h: 0.3, bold: true, color: key ? NAVY : BLACK });
-      line(s, x, 2.49, cw, 0, key ? NAVY : G3, key ? 1.25 : 0.5);
-      txt(s, [{ text: v, options: { fontSize: 40, bold: true, fontFace: 'Arial', color: key ? NAVY : BLACK } }, { text: ' ' + u, options: { fontSize: 16, color: G1 } }], { x, y: 2.75, w: cw, h: 1.0, valign: 'middle' });
-      txt(s, d, { x, y: 3.95, w: cw, h: 0.9 });
+    const lw = 1.3, cw = (W - lw - 0.6) / 3;
+    [['関係者ヒアリング', '32', '件', '沿線3市・県・事業者・学校・利用者団体', '2026年4〜6月', '第2章・第3章', false], ['沿線住民アンケート', '1,200', '件', '無作為抽出の3,000人に郵送', '2026年5月、回収率40%', '第1章（存続の意向）', true], ['運行・決算データ', '10', '年分', '駅別乗降・定期券種別・費目別決算', '2014〜2024年度', '第1章・第2章', false]].forEach(([n, v, u, who, when, used, key], i) => {
+      const x = L + lw + i * (cw + 0.3);
+      head(s, x, 2.08, cw, n, { key });
+      txt(s, [{ text: v, options: { fontSize: 40, bold: true, fontFace: 'Arial', color: key ? NAVY : BLACK } }, { text: ' ' + u, options: { fontSize: 16, color: G1 } }], { x, y: 2.55, w: cw, h: 1.0, valign: 'middle' });
+      [who, when, used].forEach((t, j) => txt(s, t, { x, y: 3.85 + j * 0.85, w: cw, h: 0.7, valign: 'middle', bold: key && j === 2, color: key && j === 2 ? NAVY : BLACK }));
     });
+    ['対象', '時期', '使った章'].forEach((k, j) => { txt(s, k, { x: L, y: 3.85 + j * 0.85, w: lw - 0.1, h: 0.7, valign: 'middle', bold: true, color: G1 }); rowRule(s, L, 3.78 + j * 0.85, W); });
   }
 
   // ---------- 第1章 ----------
@@ -118,8 +119,7 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     const s = frame('EX', CH[0], '輸送人員は基本シナリオでも2045年度に118万人まで減り、楽観シナリオでも1割以上減る。利用の自然回復には期待できない', null, null,
       N('P27 シナリオ比較', 'E-03（将来人口推計）・E-01'), OPT('注）路線・数値はすべて架空の完成例。2025年度は推計の起点\n出所）架空の将来人口推計を基に作成'));
     const lw = 6.0;
-    txt(s, [{ text: '輸送人員の見通し', options: { bold: true } }, { text: '　（万人、2025–2045年度（予測））', options: { fontSize: 11, color: G1 } }], { x: L, y: BODY_Y, w: lw, h: 0.3 });
-    line(s, L, BODY_Y + 0.34, lw, 0, G3, 0.5);
+    head(s, L, BODY_Y, lw, '輸送人員の見通し（万人、2025–2045年度（予測））');
     const labels = ['2025', '2030', '2035', '2040', '2045'];
     s.addChart(pres.charts.LINE, [{ name: '楽観', labels, values: [158, 154, 150, 145, 140] }, { name: '基本', labels, values: [158, 148, 138, 128, 118] }, { name: '悲観', labels, values: [158, 142, 126, 110, 95] }],
       Object.assign({}, chartBase, { x: L, y: 2.05, w: lw - 0.9, h: 4.55, chartColors: [G3, NAVY, G2], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 14, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 80, valAxisMaxVal: 170 }));
@@ -127,12 +127,12 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     txt(s, '基本 118', { x: L + lw - 0.95, y: 3.75, w: 1.0, h: 0.3, bold: true, color: NAVY });
     txt(s, '悲観 95', { x: L + lw - 0.95, y: 4.8, w: 1.0, h: 0.3, color: G1 });
     const rx = L + lw + 0.3, rw = R - rx;
-    txt(s, '各シナリオの前提', { x: rx, y: BODY_Y, w: rw, h: 0.3, bold: true });
-    line(s, rx, BODY_Y + 0.34, rw, 0, G3, 0.5);
+    head(s, rx, BODY_Y, rw, '各シナリオの前提（2045年度）');
     const data = [[cell('', { border: bottom(G2, 1) }), cell('沿線人口', { bold: true, align: 'center', border: bottom(G2, 1) }), cell('利用率', { bold: true, align: 'center', border: bottom(G2, 1) })]]
-      .concat([['楽観', '−20%', '＋2pt'], ['基本', '−25%', '±0pt'], ['悲観', '−30%', '−2pt']].map((r, i) => r.map((c, j) => cell(c, { align: j === 0 ? 'left' : 'center', bold: i === 1, color: i === 1 ? NAVY : BLACK, border: bottom() }))));
+      .concat([['楽観', '−20%', '＋2pt'], ['基本', '−25%', '±0pt'], ['悲観', '−30%', '−2pt']].map((r, i) => r.map((c, j) => cell(c, { align: j === 0 ? 'left' : 'center', fontFace: j === 0 ? F : 'Arial', bold: i === 1, color: i === 1 ? NAVY : BLACK, border: i < 2 ? bottom() : none }))));
     s.addTable(data, { x: rx, y: 2.15, w: rw, colW: [1.0, (rw - 1.0) / 2, (rw - 1.0) / 2], rowH: [0.5, 0.7, 0.7, 0.7] });
-    txt(s, '沿線人口：2020年 8.4万人 → 2045年 6.3万人（基本）', { x: rx, y: 5.0, w: rw, h: 0.7 });
+    rowRule(s, rx, 4.95, rw);
+    txt(s, '沿線人口は2020年の8.4万人から、2045年に6.3万人へ減る（基本）', { x: rx, y: 5.1, w: rw, h: 0.7 });
   }
 
   // E09 アンケート
@@ -143,8 +143,8 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     s.addChart(pres.charts.BAR, [
       { name: 'そう思う', labels, values: [41, 48, 35, 37, 45].reverse() }, { name: 'ややそう思う', labels, values: [27, 22, 27, 28, 29].reverse() },
       { name: 'どちらでもない', labels, values: [18, 16, 22, 20, 15].reverse() }, { name: 'そう思わない', labels, values: [14, 14, 16, 15, 11].reverse() },
-    ], Object.assign({}, chartBase, { x: L, y: 2.45, w: W, h: 4.2, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 45, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
-    [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']].forEach(([n, c], i) => { const x = L + 1.6 + i * 2.25; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.07, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.02, w: 1.9, h: 0.3, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
+    ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 45, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+    [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']].forEach(([n, c], i) => { const x = L + 1.6 + i * 2.1; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.12, w: 1.7, h: 0.3, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
   }
 
   // ---------- 第2章 ----------
@@ -173,17 +173,23 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
   // E12 大型数値の対比
   {
     const s = frame('EX', CH[1], '1人当たりの営業費用は937円で、同規模の地方鉄道の平均620円の1.5倍に達する。利用の減少に費用の削減が追いついていない', null, null,
-      N('P38 大型数値の対比', 'E-05・E-06（同規模事業者の公表決算）', '検算：14.8億円÷158万人＝937円、937÷620＝1.51'), OPT());
+      N('P38 大型数値の対比', 'E-05・E-06（同規模事業者の公表決算）', '検算：14.8億円÷158万人＝937円、937÷620＝1.51。内訳 6.9億÷158万＝437、3.2億÷158万＝203、残り297。差 107＋83＝190（317の60%）'), OPT());
     const cw = (W - 1.2) / 2;
-    [['みなと鉄道', '937', '円／人', true], ['同規模の地方鉄道10社の平均', '620', '円／人', false]].forEach(([n, v, u, key], i) => {
+    [['みなと鉄道', '937', [['人件費', '437'], ['修繕費', '203'], ['その他（減価償却・動力ほか）', '297']], true], ['同規模10社の平均', '620', [['人件費', '330'], ['修繕費', '120'], ['その他（減価償却・動力ほか）', '170']], false]].forEach(([n, v, br, key], i) => {
       const x = L + i * (cw + 1.2);
-      txt(s, n, { x, y: 2.2, w: cw, h: 0.35, align: 'center', bold: true, color: key ? NAVY : BLACK });
-      line(s, x, 2.62, cw, 0, key ? NAVY : G3, key ? 1.25 : 0.5);
-      txt(s, v, { x, y: 2.9, w: cw, h: 1.3, align: 'center', valign: 'middle', fontSize: 54, bold: true, color: key ? NAVY : G2, fontFace: 'Arial' });
-      txt(s, u, { x, y: 4.25, w: cw, h: 0.35, align: 'center', color: G1 });
+      head(s, x, BODY_Y + 0.05, cw, n, { key, align: 'center' });
+      txt(s, [{ text: v, options: { fontSize: 54, bold: true, color: key ? NAVY : G2 } }, { text: '  円／人', options: { fontSize: 16, color: G1 } }], { x, y: 2.15, w: cw, h: 1.3, align: 'center', valign: 'middle', fontFace: 'Arial' });
+      txt(s, '内訳', { x, y: 3.65, w: cw, h: 0.3, bold: true, color: G1 });
+      rowRule(s, x, 4.02, cw);
+      br.forEach(([k, b], j) => {
+        txt(s, k, { x, y: 4.12 + j * 0.5, w: cw - 1.1, h: 0.42, valign: 'middle' });
+        txt(s, b + ' 円', { x: x + cw - 1.1, y: 4.12 + j * 0.5, w: 1.1, h: 0.42, valign: 'middle', align: 'right', fontFace: 'Arial', bold: key && j < 2, color: key && j < 2 ? NAVY : BLACK });
+      });
     });
-    txt(s, '×1.5', { x: L + cw, y: 3.25, w: 1.2, h: 0.6, align: 'center', valign: 'middle', fontSize: 20, bold: true, color: NAVY });
-    txt(s, '補足：1人当たり営業費用＝営業費用÷輸送人員（2024年度）。平均は営業距離20〜40kmの10社の単純平均', { x: L, y: 5.2, w: W, h: 0.3, fontSize: 11, color: G1, align: 'center' });
+    txt(s, '×1.5', { x: L + cw, y: 2.45, w: 1.2, h: 0.6, align: 'center', valign: 'middle', fontSize: 22, bold: true, color: NAVY, fontFace: 'Arial' });
+    rowRule(s, L, 5.75, W);
+    txt(s, '差317円の6割は人件費と修繕費（＋107円、＋83円）による', { x: L, y: 5.85, w: W, h: 0.35, bold: true, color: NAVY, align: 'center' });
+    txt(s, '補足：1人当たり営業費用＝営業費用÷輸送人員（2024年度）。平均は営業距離20〜40kmの10社の単純平均', { x: L, y: 6.3, w: W, h: 0.3, fontSize: 11, color: G1, align: 'center' });
   }
 
   // E13 計算ロジック
@@ -211,8 +217,8 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
       N('P28 感度分析', 'E-05', '検算：運賃収入8.1×10%＝0.81、人件費6.9×10%＝0.69、修繕費3.2×10%＝0.32、減価償却2.1×10%＝0.21、動力費1.4×10%＝0.14'), OPT());
     const items = [['輸送人員', 0.81, true], ['人件費', 0.69, false], ['修繕費', 0.32, false], ['減価償却費', 0.21, false], ['動力費', 0.14, false]];
     const cx = L + 2.6 + (W - 2.6) / 2, sc = 3.5, top = 2.3;
-    txt(s, '悪化', { x: cx - 2.4, y: 2.0, w: 2.2, h: 0.28, align: 'right', color: G1 });
-    txt(s, '改善', { x: cx + 0.2, y: 2.0, w: 2.2, h: 0.28, color: G1 });
+    txt(s, '悪化', { x: cx - 2.4, y: 2.08, w: 2.2, h: 0.28, align: 'right', color: G1 });
+    txt(s, '改善', { x: cx + 0.2, y: 2.08, w: 2.2, h: 0.28, color: G1 });
     items.forEach(([n, v, key], i) => {
       const y = top + 0.2 + i * 0.82;
       txt(s, n, { x: L, y, w: 2.4, h: 0.5, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
@@ -236,9 +242,9 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     const headr = ['評価基準', '案A　現行維持\n（赤字を補填）', '案B　上下分離\n（推奨）', '案C　BRT転換'];
     const rows = [['公的負担の小ささ', '○', '●', '●'], ['利便性（速さ・定時性）', '●', '●', '◑'], ['実現性（合意・手続き）', '●', '◑', '○'], ['将来の持続性', '○', '●', '◑']];
     const data = [headr.map((h, i) => cell(h, { bold: true, align: 'center', color: i === 2 ? NAVY : BLACK, border: bottom(G2, 1) }))]
-      .concat(rows.map(r => r.map((c, i) => cell(c, { fontSize: i === 0 ? 14 : 22, align: i === 0 ? 'left' : 'center', bold: i === 0, color: i === 0 ? BLACK : (i === 2 ? NAVY : G2), border: bottom() }))));
-    s.addTable(data, { x: L, y: 2.1, w: W, colW: [3.0, 2.4, 2.4, W - 7.8], rowH: [0.8, 0.9, 0.9, 0.9, 0.9] });
-    s.addShape(pres.shapes.RECTANGLE, { x: L + 5.4, y: 2.05, w: 2.4, h: 4.5, fill: { type: 'none' }, line: { color: NAVY, width: 1.5 } });
+      .concat(rows.map((r, ri) => r.map((c, i) => cell(c, { fontSize: i === 0 ? 14 : 22, align: i === 0 ? 'left' : 'center', bold: i === 0, color: i === 0 ? BLACK : (i === 2 ? NAVY : G2), border: ri < rows.length - 1 ? bottom() : none }))));
+    s.addTable(data, { x: L, y: 2.17, w: W, colW: [3.0, 2.4, 2.4, W - 7.8], rowH: [0.8, 0.9, 0.9, 0.9, 0.9] });
+    s.addShape(pres.shapes.RECTANGLE, { x: L + 5.4, y: 2.12, w: 2.4, h: 4.5, fill: { type: 'none' }, line: { color: NAVY, width: 1.5 } });
   }
 
   // E17 上下分離の仕組み
@@ -283,7 +289,7 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     const rows = [['運賃の5%改定', 0.40, '2028年度', '中'], ['観光列車と周遊券', 0.30, '2027年度', '中'], ['通学定期の家族割', 0.15, '2027年度', '高'], ['駅のパーク＆ライド', 0.10, '2028年度', '高'], ['沿線企業の通勤定期', 0.05, '2027年度', '高']];
     const data = [['増収策', '効果', '効果の大きさ', '開始', '確度'].map((h, j) => cell(h, { bold: true, align: j === 0 ? 'left' : 'center', border: bottom(G2, 1) }))]
       .concat(rows.map((r, i) => [cell(r[0], { bold: i === 0, color: i === 0 ? NAVY : BLACK, border: bottom() }), cell(r[1].toFixed(2), { align: 'center', fontFace: 'Arial', bold: i === 0, color: i === 0 ? NAVY : BLACK, border: bottom() }), cell('', { border: bottom() }), cell(r[2], { align: 'center', border: bottom() }), cell(r[3], { align: 'center', border: bottom() })]))
-      .concat([[cell('合計', { bold: true, border: bottom(G2, 1) }), cell('1.00', { align: 'center', fontFace: 'Arial', bold: true, border: bottom(G2, 1) }), cell('', { border: bottom(G2, 1) }), cell('', { border: bottom(G2, 1) }), cell('', { border: bottom(G2, 1) })]]);
+      .concat([[cell('合計', { bold: true, border: none }), cell('1.00', { align: 'center', fontFace: 'Arial', bold: true, border: none }), cell('', { border: none }), cell('', { border: none }), cell('', { border: none })]]);
     s.addTable(data, { x: L, y: 2.1, w: W, colW: [2.9, 1.1, 3.5, 1.5, W - 9.0], rowH: [0.45, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6] });
     rows.forEach((r, i) => s.addShape(pres.shapes.RECTANGLE, { x: L + 4.05, y: 2.55 + i * 0.6 + 0.17, w: r[1] * 7.5, h: 0.26, fill: { color: i === 0 ? NAVY : G3 }, line: { type: 'none' } }));
   }
@@ -295,34 +301,39 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
   {
     const s = frame('EX', CH[3], '移行は3段階で進め、2028年4月に上下分離へ移る。2027年3月の協議会で3市の負担割合に合意できれば、国の認定申請に進める', '上下分離への移行ロードマップ', '（2026–2028年度）',
       N('P13 プロセス／ロードマップ', 'E-10（手続きの所要期間）'), OPT());
-    const ph = [['段階1　計画をつくる', '2026年度', ['法定協議会を設置', '再構築実施計画を策定']], ['段階2　移行を準備する', '2027年度', ['国の認定を申請', '施設の譲渡契約を締結']], ['段階3　移行する', '2028年4月〜', ['上下分離で運行開始', '増収策を本格実施']]];
-    const pw = (W - 0.3) / 3;
+    const ph = [['計画をつくる', '2026年度', ['法定協議会を設置', '再構築実施計画を策定'], '3市の負担割合に合意', '県・沿線3市'], ['移行を準備する', '2027年度', ['国の認定を申請', '施設の譲渡契約を締結'], '国の認定を得る', '県・みなと鉄道'], ['移行する', '2028年4月〜', ['上下分離で運行開始', '増収策を本格実施'], '会社の収支が黒字', 'みなと鉄道']];
+    const lw = 1.55, gx = L + lw, pw = (W - lw - 0.3) / 3, chw = (W - lw + 0.2) / 3, top = 2.12;
+    const rowsY = [top + 0.85, top + 1.45, top + 2.6, top + 3.35];
+    ['期間', '主な取組', '次へ進む条件', '担い手'].forEach((k, j) => { txt(s, k, { x: L, y: rowsY[j], w: lw - 0.1, h: j === 1 ? 1.0 : 0.6, valign: 'middle', bold: true, color: G1 }); if (j < 3) rowRule(s, L, rowsY[j + 1] - 0.08, W); });
     ph.forEach((p, i) => {
-      const x = L + i * (pw + 0.15), cur = i === 0;
-      s.addShape(pres.shapes.CHEVRON, { x, y: 2.15, w: pw, h: 0.7, fill: { color: cur ? NAVY : WHITE }, line: { color: cur ? NAVY : G2, width: 1 } });
-      txt(s, p[0], { x: x + 0.35, y: 2.15, w: pw - 0.6, h: 0.7, bold: true, color: cur ? WHITE : BLACK, valign: 'middle' });
-      txt(s, p[1], { x, y: 3.0, w: pw, h: 0.3, color: G1, align: 'center' });
-      p[2].forEach((t, j) => txt(s, '・' + t, { x: x + 0.2, y: 3.55 + j * 0.45, w: pw - 0.3, h: 0.35 }));
+      const x = gx + i * (pw + 0.15), cur = i === 0;
+      s.addShape(i === 0 ? pres.shapes.PENTAGON : pres.shapes.CHEVRON, { x: gx + i * (chw - 0.1), y: top, w: chw, h: 0.62, fill: { color: cur ? NAVY : G3 }, line: { type: 'none' } });
+      txt(s, '段階' + (i + 1) + '　' + p[0], { x: gx + i * (chw - 0.1) + 0.3, y: top, w: chw - 0.6, h: 0.62, bold: true, color: cur ? WHITE : BLACK, valign: 'middle' });
+      txt(s, p[1], { x: x + 0.1, y: rowsY[0], w: pw - 0.2, h: 0.6, valign: 'middle', color: G1 });
+      bullets(s, p[2], { x: x + 0.1, y: rowsY[1] + 0.05, w: pw - 0.2, h: 1.0 });
+      txt(s, p[3], { x: x + 0.1, y: rowsY[2], w: pw - (i === 0 ? 0.6 : 0.2), h: 0.6, valign: 'middle', bold: cur, color: cur ? NAVY : BLACK });
+      txt(s, p[4], { x: x + 0.1, y: rowsY[3], w: pw - 0.2, h: 0.6, valign: 'middle' });
     });
-    const dx = L + pw + 0.02;
-    s.addShape(pres.shapes.DIAMOND, { x: dx - 0.17, y: 4.85, w: 0.34, h: 0.34, fill: { color: NAVY }, line: { type: 'none' } });
-    txt(s, '判断点：2027年3月の協議会\n沿線3市の負担割合に合意できれば認定申請へ', { x: dx + 0.3, y: 4.75, w: 5.5, h: 0.65, bold: true, color: NAVY });
-    line(s, L, 5.02, W, 0, G3, 0.75);
+    s.addShape(pres.shapes.DIAMOND, { x: gx + pw - 0.37, y: rowsY[2] + 0.13, w: 0.34, h: 0.34, fill: { color: NAVY }, line: { type: 'none' } });
+    txt(s, '判断点：2027年3月の協議会で負担割合に合意できれば、国の認定申請に進む', { x: gx, y: top + 4.15, w: W - lw, h: 0.35, bold: true, color: NAVY });
   }
 
   // E22 効果（KPI）
   {
     const s = frame('EX', CH[3], '上下分離と増収策で、2030年度に自治体の実質負担は年4.1億円減り、会社の収支は黒字に転じる。運行本数も1日44本を維持できる', '施策実行後の効果', '（2030年度、現行維持との比較）',
       N('P20 数値ハイライト', 'E-07・E-09', '検算：6.3−2.2＝4.1、会社収支 −0.9＋1.0＝＋0.1'), OPT());
-    const k = [['自治体の実質負担', '−4.1', '億円／年', true, '6.3 → 2.2億円'], ['会社の営業収支', '＋0.1', '億円／年', false, '−5.2 → ＋0.1億円'], ['運行本数', '44', '本／日', false, '現行の本数を維持'], ['輸送人員', '＋4%', '（2030年度）', false, '148 → 154万人（基本比）']];
+    const k = [['自治体の実質負担', '−4.1', '億円／年', true, '6.3 → 2.2億円', '上下分離と国の補助による'], ['会社の営業収支', '＋0.1', '億円／年', false, '−5.2 → ＋0.1億円', '施設費用の移管と増収策による'], ['運行本数', '44', '本／日', false, '44 → 44本', '現行の本数を維持する前提'], ['輸送人員', '＋4%', '（2030年度）', false, '148 → 154万人', '基本シナリオとの比較']];
     const cw = W / 4;
-    k.forEach(([n, v, u, key, sub], i) => {
+    k.forEach(([n, v, u, key, sub, basis], i) => {
       const x = L + i * cw;
-      if (i > 0) line(s, x, 2.3, 0, 3.4, G4, 0.75);
-      txt(s, n, { x: x + 0.1, y: 2.4, w: cw - 0.2, h: 0.35, align: 'center', color: G1 });
-      txt(s, v, { x: x + 0.1, y: 3.0, w: cw - 0.2, h: 1.0, align: 'center', valign: 'middle', fontSize: 30, bold: true, fontFace: 'Arial', color: key ? NAVY : BLACK });
-      txt(s, u, { x: x + 0.1, y: 4.05, w: cw - 0.2, h: 0.35, align: 'center', color: G1 });
-      txt(s, sub, { x: x + 0.1, y: 4.8, w: cw - 0.2, h: 0.6, align: 'center', fontSize: 14, color: G1 });
+      if (i > 0) line(s, x, 2.15, 0, 4.3, G4, 0.75);
+      txt(s, n, { x: x + 0.1, y: 2.15, w: cw - 0.2, h: 0.35, align: 'center', bold: true, color: key ? NAVY : BLACK });
+      txt(s, v, { x: x + 0.1, y: 2.65, w: cw - 0.2, h: 0.9, align: 'center', valign: 'middle', fontSize: 32, bold: true, fontFace: 'Arial', color: key ? NAVY : BLACK });
+      txt(s, u, { x: x + 0.1, y: 3.6, w: cw - 0.2, h: 0.32, align: 'center', color: G1 });
+      rowRule(s, x + 0.25, 4.15, cw - 0.5);
+      txt(s, '現行→実行後', { x: x + 0.1, y: 4.3, w: cw - 0.2, h: 0.3, fontSize: 11, align: 'center', color: G1 });
+      txt(s, sub, { x: x + 0.1, y: 4.62, w: cw - 0.2, h: 0.6, align: 'center', fontSize: 14, bold: key, color: key ? NAVY : BLACK });
+      txt(s, '補足：' + basis, { x: x + 0.15, y: 5.4, w: cw - 0.3, h: 0.8, align: 'center', fontSize: 11, color: G1 });
     });
   }
 
@@ -332,31 +343,31 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
       N('P30 リスク一覧', 'E-07・E-08', '検算：補助なしの実質負担＝5.3−1.0＝4.3'), OPT());
     const rows = [['国の補助が得られない', '2026年度末までに認定の見通しが立たない', '●', '国と事前協議を重ね、計画を補強する'], ['沿線3市の負担割合で合意できない', '2027年1月の幹事会で案がまとまらない', '◑', '県が調整案を示す'], ['運賃改定に利用者が反発する', 'パブリックコメントで反対が過半', '◑', '通学定期の家族割と同時に実施'], ['修繕費が想定を上回る', '橋りょう点検で大規模補修が必要と判明', '◑', '補修計画を前倒しで精査する']];
     const data = [['リスク', '兆候（何を見るか）', '影響度', '対応'].map((h, j) => cell(h, { bold: true, align: j === 2 ? 'center' : 'left', border: bottom(G2, 1) }))]
-      .concat(rows.map((r, i) => r.map((c, j) => cell(c, { align: j === 2 ? 'center' : 'left', fontSize: j === 2 ? 20 : 14, bold: i === 0 && j !== 2, color: i === 0 ? NAVY : (j === 2 ? G2 : BLACK), border: bottom() }))));
-    s.addTable(data, { x: L, y: 2.1, w: W, colW: [3.0, 3.3, 1.0, W - 7.3], rowH: [0.5, 0.95, 0.95, 0.95, 0.95] });
+      .concat(rows.map((r, i) => r.map((c, j) => cell(c, { align: j === 2 ? 'center' : 'left', fontSize: j === 2 ? 20 : 14, bold: i === 0 && j !== 2, color: i === 0 ? NAVY : (j === 2 ? G2 : BLACK), border: i < rows.length - 1 ? bottom() : none }))));
+    s.addTable(data, { x: L, y: 2.1, w: W, colW: [3.0, 3.3, 1.0, W - 7.3], rowH: [0.5, 1.0, 1.0, 1.0, 1.0] });
   }
 
   // E24 意思決定
   {
     const s = frame('EX', '4　ご判断いただきたい事項', '本日は、上下分離を基本方針とし、2026年度に協議会を設けることをご判断いただきたい。決定すれば2028年4月の移行に間に合う', null, null,
       N('P32 意思決定ページ', 'E-07・E-10'), OPT());
-    s.addShape(pres.shapes.RECTANGLE, { x: L, y: BODY_Y, w: W - 1.2, h: 0.75, fill: { color: BLUE5 }, line: { color: NAVY, width: 1.25 } });
+    s.addShape(pres.shapes.RECTANGLE, { x: L, y: BODY_Y, w: W - 1.2, h: 0.75, fill: { color: BLUE5 }, line: { type: 'none' } });
     txt(s, '決めていただきたいこと', { x: L + 0.2, y: BODY_Y, w: 2.6, h: 0.75, valign: 'middle', bold: true, color: NAVY });
     txt(s, '上下分離（案B）を基本方針とし、2026年6月に法定協議会を設置すること', { x: L + 2.9, y: BODY_Y, w: W - 4.3, h: 0.75, valign: 'middle', bold: true, color: NAVY });
     const lw = 5.6;
-    txt(s, '選択肢', { x: L, y: 2.55, w: lw, h: 0.3, bold: true }); line(s, L, 2.89, lw, 0, G3, 0.5);
+    head(s, L, 2.55, lw, '選択肢');
     [['案A　現行維持', '実質負担 6.3億円', '利便性 高', false], ['案B　上下分離', '実質負担 2.2億円', '利便性 高', true], ['案C　BRT転換', '実質負担 2.4億円', '利便性 中', false]].forEach(([n, a, b, key], i) => {
-      const y = 3.0 + i * 0.95;
-      txt(s, n, { x: L, y, w: 2.1, h: 0.75, valign: 'middle', bold: true, color: key ? NAVY : BLACK });
-      txt(s, a, { x: L + 2.15, y, w: 2.0, h: 0.75, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
-      txt(s, b, { x: L + 4.2, y, w: lw - 4.2, h: 0.75, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
-      line(s, L, y + 0.85, lw, 0, G4, 0.75);
+      const y = 3.05 + i * 1.05;
+      txt(s, n, { x: L + 0.12, y, w: 2.0, h: 0.85, valign: 'middle', bold: true, color: key ? NAVY : BLACK });
+      txt(s, a, { x: L + 2.15, y, w: 2.0, h: 0.85, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
+      txt(s, b, { x: L + 4.2, y, w: lw - 4.2, h: 0.85, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
+      if (i < 2) rowRule(s, L, y + 0.95, lw);
     });
-    s.addShape(pres.shapes.RECTANGLE, { x: L - 0.05, y: 3.95, w: lw + 0.1, h: 0.85, fill: { type: 'none' }, line: { color: NAVY, width: 1.5 } });
+    s.addShape(pres.shapes.RECTANGLE, { x: L, y: 4.02, w: lw, h: 1.0, fill: { type: 'none' }, line: { color: NAVY, width: 1.5 } });
     const rx = L + lw + 0.4, rw = R - rx;
-    txt(s, '判断の前提', { x: rx, y: 2.55, w: rw, h: 0.3, bold: true }); line(s, rx, 2.89, rw, 0, G3, 0.5);
-    txt(s, '・国の補助は施設費用差額の2分の1\n・線路使用料は年1.0億円\n・負担割合は協議会で決める', { x: rx, y: 3.0, w: rw, h: 1.3 });
-    txt(s, '決定後の動き', { x: rx, y: 4.45, w: rw, h: 0.3, bold: true }); line(s, rx, 4.79, rw, 0, G3, 0.5);
-    txt(s, '2026年6月　法定協議会を設置\n2027年3月　負担割合を合意\n2028年4月　上下分離で運行開始', { x: rx, y: 4.9, w: rw, h: 1.3 });
+    head(s, rx, 2.55, rw, '判断の前提');
+    bullets(s, ['国の補助は施設費用差額の2分の1', '線路使用料は年1.0億円', '負担割合は協議会で決める'], { x: rx, y: 3.05, w: rw, h: 1.3 });
+    head(s, rx, 4.55, rw, '決定後の動き');
+    txt(s, '2026年6月　法定協議会を設置\n2027年3月　負担割合を合意\n2028年4月　上下分離で運行開始', { x: rx, y: 5.05, w: rw, h: 1.3 });
   }
 };

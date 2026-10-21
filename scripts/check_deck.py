@@ -15,6 +15,93 @@ def zen_len(t):
     """全角換算の字数（半角英数・記号は0.55字）。2行に収まるかの目安に使う。"""
     return sum(0.55 if ord(c) < 0x2000 else 1 for c in t)
 
+# ---- 版面の検査（rules/slide-rules.md H章。Jinba consulting-pptx-skill の check_layout を PPTX 用に簡略化したもの） ----
+IN = 914400
+NS_A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+NS_P = "{http://schemas.openxmlformats.org/presentationml/2006/main}"
+BODY_TOP, BODY_BOTTOM = 1.9, 6.8          # 本体の範囲（インチ。スライドタイトルの線の下〜注記・出所の上）
+TYPED_BULLET = re.compile(r"^[・•●■◆▪\-－‐]\s?")
+
+def _rgb(el, path):
+    c = el.find(path)
+    return c.get("val").upper() if c is not None else None
+
+def layout_checks(slide, i):
+    """版面の検査結果を (区分, メッセージ) のリストで返す。"""
+    out, bottom, boxes, filled_line, tint = [], 0.0, 0, 0, 0
+    for sh in slide.shapes:
+        top, h, w = (sh.top or 0) / IN, (sh.height or 0) / IN, (sh.width or 0) / IN
+        if getattr(sh, "has_table", False) and sh.has_table:
+            h = sum(r.height for r in sh.table.rows) / IN
+            # H-5 最終行の下に罫線を引かない
+            last = sh.table._tbl.tr_lst[-1]
+            if any(tc.find(f"{NS_A}tcPr/{NS_A}lnB/{NS_A}solidFill") is not None for tc in last.tc_lst):
+                out.append(("WARN", "表の最終行の下に罫線がある（H-5）"))
+        empty_text = sh.has_text_frame and not sh.text_frame.text.strip()
+        if BODY_TOP - 0.05 <= top < BODY_BOTTOM and not (empty_text and h < 0.05):
+            bottom = max(bottom, min(top + h, BODY_BOTTOM))
+        pr = sh._element.find(f"{NS_P}spPr")
+        if pr is not None:
+            geom = pr.find(f"{NS_A}prstGeom")
+            fill = _rgb(pr, f"{NS_A}solidFill/{NS_A}srgbClr")
+            ln = pr.find(f"{NS_A}ln")
+            lcol = _rgb(ln, f"{NS_A}solidFill/{NS_A}srgbClr") if ln is not None else None
+            if geom is not None and geom.get("prst") in ("rect", "chevron", "homePlate"):
+                if fill and fill != "FFFFFF" and lcol and lcol != "FFFFFF": filled_line += 1
+                if geom.get("prst") == "rect" and lcol and lcol != "FFFFFF" and fill in (None, "FFFFFF") and w > 0.9 and h > 0.35: boxes += 1
+                if fill == "C1DDF1" and w > 0.6 and h > 0.3: tint += 1
+        # H-6 記号の直打ち、H-8 文字のはみ出し（見積もり）
+        if sh.has_text_frame and sh.text_frame.text.strip() and w > 0.3 and h > 0.15 and top > 0.2:
+            need = 0.0
+            for para in sh.text_frame.paragraphs:
+                t = "".join(r.text for r in para.runs)
+                if TYPED_BULLET.match(t) and len(t) > 3:
+                    out.append(("WARN", f"箇条書きの記号を文字で打っている（H-6）：{t[:16]}"))
+                size = max([r.font.size.pt for r in para.runs if r.font.size] or [14])
+                per_line = max(1.0, (w * 72) / size)
+                need += max(1, -(-zen_len(t) // per_line)) * size * 1.2 / 72
+            if need > h + 0.15:
+                out.append(("WARN", f"文字が枠からはみ出す恐れ（必要{need:.2f}in／枠{h:.2f}in、H-8）：{sh.text_frame.text.strip()[:16]}"))
+    if filled_line: out.append(("FAIL", f"塗りのある図形に枠線が重なっている（{filled_line}個、H-3）"))
+    if boxes >= 4: out.append(("WARN", f"線で囲んだ箱が{boxes}個ある。器は見出し＋線で作り、囲むのは立てたい1〜2個だけ（H-1。ツリー・フロー・体制図は可）"))
+    if tint >= 2: out.append(("WARN", f"淡い紺（Blue5）の面が{tint}か所ある。注目の面は1スライド1か所（H-4）"))
+    if bottom:
+        empty = 1 - (bottom - BODY_TOP) / (BODY_BOTTOM - BODY_TOP)
+        if empty > 0.4: out.append(("FAIL", f"本体の下{empty:.0%}が空いている。中身を足すか型を変える（引き伸ばしは不可、H-7）"))
+        elif empty > 0.3: out.append(("WARN", f"本体の下{empty:.0%}が空いている（H-7）"))
+    return out
+
+# ---- ガイド線の検査（rules/slide-rules.md B-1「ガイド線」） ----
+DEFAULT_GUIDES_CM = {"title_top": 8.80, "body_top": 5.40, "left": -13.20, "right": 13.20}
+
+def read_guides(prs):
+    """スライドマスターのガイド線（1/8pt単位）を読み、インチで返す。無ければルールの既定値から計算する。"""
+    sw, sh = prs.slide_width / IN, prs.slide_height / IN
+    g = {"title_top": sh / 2 - DEFAULT_GUIDES_CM["title_top"] / 2.54, "body_top": sh / 2 - DEFAULT_GUIDES_CM["body_top"] / 2.54,
+         "left": sw / 2 + DEFAULT_GUIDES_CM["left"] / 2.54, "right": sw / 2 + DEFAULT_GUIDES_CM["right"] / 2.54, "found": False}
+    xml = etree.tostring(prs.slide_masters[0]._element).decode()
+    horz = sorted(int(m) / 576 for m in re.findall(r'<p15:guide[^>]*orient="horz"[^>]*pos="(\d+)"', xml))
+    vert = sorted(int(m) / 576 for m in re.findall(r'<p15:guide(?![^>]*orient="horz")[^>]*pos="(\d+)"', xml))
+    if len(horz) >= 2 and len(vert) >= 2:
+        g.update(title_top=horz[0], body_top=horz[1], left=vert[0], right=vert[-1], found=True)
+    return g
+
+def guide_checks(slide, g):
+    out, tol = [], 0.03
+    tops = []
+    for sh in slide.shapes:
+        x, y, w = (sh.left or 0) / IN, (sh.top or 0) / IN, (sh.width or 0) / IN
+        if w <= 0: continue
+        if x < g["left"] - tol or x + w > g["right"] + tol:
+            label = sh.text_frame.text.strip()[:12] if sh.has_text_frame else sh.shape_type
+            out.append(("FAIL", f"ガイド線③④（左端・右端）の外にはみ出している：{label}"))
+        tops.append(y)
+    if not any(abs(t - g["title_top"]) <= 0.04 for t in tops):
+        out.append(("WARN", "メッセージブロックの上端がガイド線①にそろっていない"))
+    if not any(abs(t - g["body_top"]) <= 0.07 for t in tops):
+        out.append(("WARN", "ボディ（本体の見出し）の上端がガイド線②にそろっていない"))
+    return out
+
 def label_contrast(chart_part):
     """グラフのデータラベルの色と系列の塗りの対比を点検する（濃い塗りの内側ラベルは白、淡い塗りは黒）。"""
     root = etree.fromstring(chart_part.blob)
@@ -41,8 +128,11 @@ def label_contrast(chart_part):
 
 def main(path, sample=False):
     prs = Presentation(path)
+    guides = read_guides(prs)
     H = prs.slide_height
     fails, warns = [], []
+    if not guides["found"]:
+        warns.append((0, "スライドマスターにガイド線がない（python3 scripts/add_guides.py deck.pptx で入れる。検査は既定値で行う）"))
     for i, s in enumerate(prs.slides, 1):
         xml = etree.tostring(s._element).decode()
         # 色：パレット外
@@ -80,6 +170,11 @@ def main(path, sample=False):
             if re.match(r"^[^。]{1,12}[：:]", msg): fails.append((i, "メッセージに「見出し：」の前置き"))
             if re.search(r"(です|ます)。?$", msg): fails.append((i, "メッセージが「です・ます」調"))
         if body_chars > 200: warns.append((i, f"本体の文字が多い（約{body_chars}字）"))
+        if i > 1 and msg:
+            for tag, m in layout_checks(s, i):
+                (fails if tag == "FAIL" else warns).append((i, m))
+            for tag, m in guide_checks(s, guides):
+                (fails if tag == "FAIL" else warns).append((i, m))
         notes = s.notes_slide.notes_text_frame.text if s.has_notes_slide else ""
         if i > 1 and not re.search(r"E-?\d|エビデンス|P\d\d", notes): warns.append((i, "ノートにエビデンスID・パターンIDなし"))
     for tag, items in (("FAIL", fails), ("WARN", warns)):
