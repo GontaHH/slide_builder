@@ -89,7 +89,7 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     const steps = [['候補', 8], ['条件1　用地', 5], ['条件2　接続', 3], ['条件3　費用', 2]];
     steps.forEach(([t, n], i) => {
       const x = L + i * 2.62;
-      txt(s, t, { x, y: 2.0, w: 1.75, h: 0.3, color: G1, align: 'center' });
+      txt(s, t, { x, y: 2.08, w: 1.75, h: 0.3, color: G1, align: 'center' });
       txt(s, n + 'か所', num({ x, y: 2.28, w: 1.75, h: 0.4, align: 'center', bold: true, fontSize: 18, color: i === 3 ? NAVY : BLACK }));
       if (i < 3) arrow(s, x + 1.85, 2.47, 0.65, 0, G3, 1);
     });
@@ -114,9 +114,9 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     const rows = [['東部', 48, 27], ['北部', 41, 29], ['山間部', 35, 24], ['西部', 44, 34], ['湾岸部', 39, 30], ['中央部', 52, 45], ['南部', 33, 27], ['市街地', 58, 54]];
     const top = 2.35, rh = 0.5, x0 = L + 2.0, sc = 0.105, base = 15;
     const X = v => x0 + (v - base) * sc;
-    txt(s, '● 2015年度', { x: X(48) - 0.4, y: 2.0, w: 1.6, h: 0.3, color: G3, bold: true });
-    txt(s, '● 2025年度', { x: X(27) - 1.2, y: 2.0, w: 1.6, h: 0.3, color: G2, bold: true });
-    txt(s, '差', { x: R - 1.0, y: 2.0, w: 1.0, h: 0.3, color: G1, bold: true, align: 'right' });
+    dot(s, X(48) - 0.28, 2.23, 0.16, G3); txt(s, '2015年度', { x: X(48) - 0.15, y: 2.08, w: 1.4, h: 0.3 });
+    dot(s, X(27) - 1.08, 2.23, 0.16, G2); txt(s, '2025年度', { x: X(27) - 0.95, y: 2.08, w: 1.4, h: 0.3 });
+    txt(s, '差', { x: R - 1.0, y: 2.08, w: 1.0, h: 0.3, color: G1, bold: true, align: 'right' });
     rows.forEach(([n, a, b], i) => {
       const y = top + 0.15 + i * rh, cy = y + rh / 2, key = i === 0;
       txt(s, n, { x: L, y, w: 1.8, h: rh, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
@@ -137,8 +137,8 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     const rows = [['自家用車', 52, 56], ['鉄道', 21, 13], ['バス', 14, 5], ['徒歩・自転車', 10, 8], ['送迎', 3, 18]];
     const xa = L + 3.0, xb = L + 7.2, y0 = 6.4, sc = 0.066;
     const Y = v => y0 - v * sc;
-    txt(s, '2015年度', { x: xa - 0.8, y: 2.0, w: 1.6, h: 0.3, bold: true, align: 'center', color: G1 });
-    txt(s, '2025年度', { x: xb - 0.8, y: 2.0, w: 1.6, h: 0.3, bold: true, align: 'center', color: G1 });
+    txt(s, '2015年度', { x: xa - 0.8, y: 2.08, w: 1.6, h: 0.3, bold: true, align: 'center', color: G1 });
+    txt(s, '2025年度', { x: xb - 0.8, y: 2.08, w: 1.6, h: 0.3, bold: true, align: 'center', color: G1 });
     line(s, xa, 2.35, 0, 4.1, G4, 0.75); line(s, xb, 2.35, 0, 4.1, G4, 0.75);
     // ラベルの縦位置：値の位置から、重ならないよう最低0.3インチずつ離す
     const spread = vals => { const o = vals.map((v, i) => [Y(v), i]).sort((p, q) => p[0] - q[0]), out = []; o.forEach(([y, i], k) => { out[i] = k ? Math.max(y, out[o[k - 1][1]] + 0.3) : y; }); return out; };
@@ -242,7 +242,7 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     const stages = ['予約する', '駅まで行く', '乗り継ぐ', '受診する', '帰宅する'];
     const lx = L, lw = 1.5, x0 = L + lw, cw = (W - lw) / 5, top = 2.05;
     stages.forEach((t, j) => {
-      shape(s, j === 0 ? 'PENTAGON' : 'CHEVRON', x0 + j * cw, top, cw + 0.04, 0.45, { fill: { color: j === 2 ? NAVY : G4 }, line: { type: 'none' } });
+      shape(s, j === 0 ? 'PENTAGON' : 'CHEVRON', x0 + j * cw, top, j < 4 ? cw + 0.04 : cw, 0.45, { fill: { color: j === 2 ? NAVY : G4 }, line: { type: 'none' } });
       txt(s, t, { x: x0 + j * cw + 0.2, y: top, w: cw - 0.3, h: 0.45, valign: 'middle', align: 'center', bold: true, color: j === 2 ? WHITE : BLACK });
     });
     shape(s, 'RECTANGLE', x0 + 2 * cw + 0.03, top + 0.5, cw - 0.06, 4.15, { fill: { type: 'none' }, line: { color: NAVY, width: 1.25 } });
@@ -300,7 +300,7 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     const phases = [['フェーズ1　準備', '2027年4〜9月'], ['フェーズ2　実証', '2027年10月〜2028年3月'], ['フェーズ3　移行', '2028年4〜9月']];
     const lw = 2.1, x0 = L + lw, pw = (W - lw) / 3, top = 2.05;
     phases.forEach(([p, d], j) => {
-      shape(s, j === 0 ? 'PENTAGON' : 'CHEVRON', x0 + j * pw, top, pw + 0.04, 0.42, { fill: { color: G4 }, line: { type: 'none' } });
+      shape(s, j === 0 ? 'PENTAGON' : 'CHEVRON', x0 + j * pw, top, j < 2 ? pw + 0.04 : pw, 0.42, { fill: { color: G4 }, line: { type: 'none' } });
       txt(s, p, { x: x0 + j * pw + 0.25, y: top, w: pw - 0.4, h: 0.42, valign: 'middle', bold: true });
       txt(s, d, { x: x0 + j * pw, y: top + 0.45, w: pw, h: 0.3, align: 'center', color: G1 });
     });
@@ -308,9 +308,9 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     rows.forEach(([h, bars], i) => {
       const y = top + 0.95 + i * 0.8;
       txt(s, h, { x: L, y, w: lw - 0.1, h: 0.55, valign: 'middle', bold: true });
-      line(s, L, y + 0.7, W, 0, G4, 0.5);
+      if (i < rows.length - 1) line(s, L, y + 0.7, W, 0, G4, 0.75);
       bars.forEach(([a, b, t, key]) => {
-        shape(s, 'RECTANGLE', x0 + a * pw + 0.05, y + 0.06, (b - a) * pw - 0.1, 0.44, { fill: { color: key ? NAVY : G5 }, line: { color: key ? NAVY : G3, width: 0.75 } });
+        shape(s, 'RECTANGLE', x0 + a * pw + 0.05, y + 0.06, (b - a) * pw - 0.1, 0.44, { fill: { color: key ? NAVY : G5 }, line: { type: 'none' } });
         txt(s, t, { x: x0 + a * pw + 0.12, y: y + 0.06, w: (b - a) * pw - 0.24, h: 0.44, valign: 'middle', align: 'center', bold: key, color: key ? WHITE : BLACK, fontSize: 14 });
       });
     });
