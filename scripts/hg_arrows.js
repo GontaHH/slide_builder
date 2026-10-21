@@ -7,12 +7,13 @@
 //   'circle'         丸の中に白抜きの細い「＞」                           紺の丸                 グレーの丸
 //   'line'           細い「＞」の線1本                                   紺                     淡いグレー
 //   'lineDouble'     細い「＞」の線2本                                   紺                     淡いグレー
-// dir: 'r'（右向き）／'d'（下向き）。下向きは右向きの図形の縦横を入れ替えて作る。
+// dir: 'r'（右向き）／'d'（下向き）。下向きは二重の矢羽（double）と三角＋線（triStroke）だけで使う（丸・線は右向きだけ）。
 // x, y は左上、size は右向きのときの高さ（下向きのときは幅）。返り値は描いた幅（下向きは高さ）。
 const NAVY = '000F78', GRAY = '7F7F7F', LIGHT = 'CCCCCC', WHITE = 'FFFFFF';
 
 function hgArrow(pres, s, kind, x, y, size, opt = {}) {
   const dir = opt.dir || 'r', tone = opt.tone || 'accent';
+  if (dir === 'd' && !['double', 'triStroke'].includes(kind)) throw new Error('下向きは double か triStroke だけ: ' + kind);
   const h = size;
   // 右向きの局所座標（幅 bw × 高さ h）で多角形を定義し、下向きなら縦横を入れ替える
   const put = (pts, ox, oy, bw, bh, style) => {
@@ -24,8 +25,8 @@ function hgArrow(pres, s, kind, x, y, size, opt = {}) {
   const stroke = (color, width) => ({ fill: { type: 'none' }, line: { color, width, cap: 'round' } });
   // 太い「＞」：幅 0.55h、線の太さは幅の半分
   const thick = (ox, oy, hh, color) => { const w = 0.66 * hh, t = 0.46 * w; put([{ x: 0, y: 0 }, { x: t, y: 0 }, { x: w, y: hh / 2 }, { x: t, y: hh }, { x: 0, y: hh }, { x: w - t, y: hh / 2 }, { close: true }], ox, oy, w, hh, solid(color)); return w; };
-  // 塗りの三角：幅 0.8h
-  const tri = (ox, oy, hh, color) => { const w = 0.72 * hh; put([{ x: 0, y: 0 }, { x: w, y: hh / 2 }, { x: 0, y: hh }, { close: true }], ox, oy, w, hh, solid(color)); return w; };
+  // 塗りの三角：細長く（幅は高さの半分、長辺を長く）
+  const tri = (ox, oy, hh, color) => { const w = 0.5 * hh; put([{ x: 0, y: 0 }, { x: w, y: hh / 2 }, { x: 0, y: hh }, { close: true }], ox, oy, w, hh, solid(color)); return w; };
   // 細い「＞」の線：幅 0.45h
   const line = (ox, oy, hh, color, width) => { const w = 0.45 * hh; put([{ x: 0, y: 0 }, { x: w, y: hh / 2 }, { x: 0, y: hh }], ox, oy, w, hh, stroke(color, width)); return w; };
 
@@ -36,8 +37,8 @@ function hgArrow(pres, s, kind, x, y, size, opt = {}) {
   }
   if (kind === 'triStroke') {
     const th = 0.88 * h, w = tri(0, (h - th) / 2, th, GRAY);
-    const lh = 0.82 * h, lw = line(0.68 * w, (h - lh) / 2, lh, tone === 'accent' ? NAVY : GRAY, Math.max(1.75, h * 6.5));
-    return 0.68 * w + lw;
+    const lh = 0.82 * h, lw = line(0.75 * w, (h - lh) / 2, lh, tone === 'accent' ? NAVY : GRAY, Math.max(1.75, h * 6.5));
+    return 0.75 * w + lw;
   }
   if (kind === 'circle') return hgCircle(pres, s, x, y, h, opt);
   if (kind === 'line') return line(0, 0, h, tone === 'accent' ? NAVY : LIGHT, Math.max(1.25, h * 4.5));

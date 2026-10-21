@@ -61,13 +61,13 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
     line(s, L + 4.05, Y0 + 2.56, 0, 1.04, NAVY, 1.5);
     txt(s, '補足：基本はこの2つ', { x: L + 4.1, y: Y0 + 2.5, w: 0.3, h: 1.6, fontSize: 11, color: NAVY, vert: 'eaVert' });
     const rx = L + 4.9, rw = R - rx;
-    head(s, rx, Y0, 3.25, '矢印（上段：強調、下段：通常）');
+    head(s, rx, Y0, 3.25, '矢印（右2列は下向き）');
     // HG_pptFMT のパーツ集と同じ4×4（左2列：右向き、右2列：下向き）。図形は scripts/hg_arrows.js
     const gs = 0.62, gx = rx + 0.05, gy = Y0 + 0.55, sz = 0.34;
     const grid = [[['double', 'r', 'accent'], ['triStroke', 'r', 'accent'], ['double', 'd', 'accent'], ['triStroke', 'd', 'accent']],
       [['double', 'r', 'gray'], ['triStroke', 'r', 'gray'], ['double', 'd', 'gray'], ['triStroke', 'd', 'gray']],
-      [['circle', 'r', 'gray'], ['circle', 'r', 'accent'], ['circle', 'd', 'gray'], ['circle', 'd', 'accent']],
-      [['line', 'r', 'gray'], ['lineDouble', 'r', 'accent'], ['line', 'd', 'gray'], ['lineDouble', 'd', 'accent']]];
+      [['circle', 'r', 'gray'], ['circle', 'r', 'accent']],
+      [['line', 'r', 'gray'], ['lineDouble', 'r', 'accent']]];
     grid.forEach((row, i) => row.forEach(([k, dir, tone], j) => hgArrow(pres, s, k, gx + j * gs + (dir === 'd' ? 0.02 : 0.08), gy + i * gs + (dir === 'd' ? 0.08 : 0.02), sz, { dir, tone })));
     ['二重の矢羽', '三角＋線', '丸', '線'].forEach((n, i) => txt(s, n, { x: gx + 4 * gs, y: gy + i * gs, w: 0.8, h: sz + 0.04, fontSize: 11, valign: 'middle', color: G1 }));
     const cx = rx + 3.4, cw = R - cx;
