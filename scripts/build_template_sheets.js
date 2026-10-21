@@ -3,6 +3,7 @@
 // 型の見本（P01〜P78）は架空の値で「完成形の見た目」を示すのに対し、テンプレート集は中身を空けた骨組み（XX）で、
 // 新しいスライドを作るときにコピーして中身を入れる。使う場面と対応する型はノートに書いた。
 // 元の書式の「Original Icons」は再配布できるか分からないため入れていない（アイコンは templates/icons/ を使う）。
+const { hgArrow, hgCircle } = require('./hg_arrows.js');
 module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const MID = L + W / 2;                                   // ガイド線⑤（中心）
@@ -17,7 +18,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
     text: t, options: { bullet: { code: lv < 0 ? '25A0' : lv === 0 ? '2022' : '2013', indent: 12 }, indentLevel: Math.max(lv, 0), paraSpaceAfter: 2, bold: lv < 0 },
   })), Object.assign({ isTextBox: true, fontFace: F, fontSize: 14, color: BLACK, margin: 0, valign: 'top' }, o));
   const badge = (s, x, y, n, d, color) => { shape(s, 'OVAL', x, y, d || 0.3, d || 0.3, { fill: { color: color || NAVY }, line: { type: 'none' } }); txt(s, String(n), num({ x, y, w: d || 0.3, h: d || 0.3, fontSize: 12, bold: true, color: WHITE, align: 'center', valign: 'middle' })); };
-  const arrowMark = (s, x, y, d) => { shape(s, 'OVAL', x, y, d, d, { fill: { color: NAVY }, line: { type: 'none' } }); shape(s, 'ISOSCELES_TRIANGLE', x + d * 0.36, y + d * 0.3, d * 0.36, d * 0.4, { rotate: 90, fill: { color: WHITE }, line: { type: 'none' } }); };
+  const arrowMark = (s, x, y, d) => hgCircle(pres, s, x, y, d, { tone: 'accent' });
   // 列見出しの矢印の線（工程の順番を示す「──>」）
   const arrowHead = (s, x, y, w, t) => {
     txt(s, t, { x, y: y - 0.36, w: w - 0.15, h: 0.32, align: 'center', bold: true, valign: 'bottom' });
@@ -60,18 +61,16 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
     line(s, L + 4.05, Y0 + 2.56, 0, 1.04, NAVY, 1.5);
     txt(s, '補足：基本はこの2つ', { x: L + 4.1, y: Y0 + 2.5, w: 0.3, h: 1.6, fontSize: 11, color: NAVY, vert: 'eaVert' });
     const rx = L + 4.9, rw = R - rx;
-    head(s, rx, Y0, rw, '矢印と注記（左：強調、右：通常）');
-    const rows = [['二重の矢羽', (x, y, c) => { shape(s, 'CHEVRON', x, y, 0.28, 0.34, { fill: { color: c }, line: { type: 'none' } }); shape(s, 'CHEVRON', x + 0.18, y, 0.28, 0.34, { fill: { color: c }, line: { type: 'none' } }); }],
-      ['三角', (x, y, c) => shape(s, 'ISOSCELES_TRIANGLE', x + 0.05, y + 0.02, 0.3, 0.3, { rotate: 90, fill: { color: c }, line: { type: 'none' } })],
-      ['下向きの矢羽', (x, y, c) => { shape(s, 'CHEVRON', x + 0.04, y - 0.06, 0.34, 0.26, { rotate: 90, fill: { color: c }, line: { type: 'none' } }); shape(s, 'CHEVRON', x + 0.04, y + 0.1, 0.34, 0.26, { rotate: 90, fill: { color: c }, line: { type: 'none' } }); }],
-      ['丸の矢印', (x, y, c) => { shape(s, 'OVAL', x + 0.04, y, 0.32, 0.32, { fill: { color: c }, line: { type: 'none' } }); shape(s, 'ISOSCELES_TRIANGLE', x + 0.15, y + 0.1, 0.12, 0.12, { rotate: 90, fill: { color: WHITE }, line: { type: 'none' } }); }]];
-    rows.forEach(([n, draw], i) => {
-      const y = Y0 + 0.6 + i * 0.6;
-      draw(rx + 0.1, y, NAVY); draw(rx + 0.85, y, G3);
-      txt(s, n, { x: rx + 1.6, y, w: 1.6, h: 0.34, valign: 'middle' });
-      if (i < rows.length - 1) rowRule(s, rx, y + 0.48, 3.25);
-    });
-    const cx = rx + 3.5, cw = R - cx;
+    head(s, rx, Y0, 3.25, '矢印（右2列は下向き）');
+    // HG_pptFMT のパーツ集と同じ4×4（左2列：右向き、右2列：下向き）。図形は scripts/hg_arrows.js
+    const gs = 0.62, gx = rx + 0.05, gy = Y0 + 0.55, sz = 0.34;
+    const grid = [[['double', 'r', 'accent'], ['triStroke', 'r', 'accent'], ['double', 'd', 'accent'], ['triStroke', 'd', 'accent']],
+      [['double', 'r', 'gray'], ['triStroke', 'r', 'gray'], ['double', 'd', 'gray'], ['triStroke', 'd', 'gray']],
+      [['circle', 'r', 'gray'], ['circle', 'r', 'accent']],
+      [['line', 'r', 'gray'], ['lineDouble', 'r', 'accent']]];
+    grid.forEach((row, i) => row.forEach(([k, dir, tone], j) => hgArrow(pres, s, k, gx + j * gs + (dir === 'd' ? 0.02 : 0.08), gy + i * gs + (dir === 'd' ? 0.08 : 0.02), sz, { dir, tone })));
+    ['二重の矢羽', '三角＋線', '丸', '線'].forEach((n, i) => txt(s, n, { x: gx + 4 * gs, y: gy + i * gs, w: 0.8, h: sz + 0.04, fontSize: 11, valign: 'middle', color: G1 }));
+    const cx = rx + 3.4, cw = R - cx;
     [0, 1].forEach(i => {
       const y = Y0 + 0.75 + i * 1.15;
       fill(s, cx + 0.35, y, cw - 0.35, 0.75, G5);
@@ -180,8 +179,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
     icon(s, 'target', L + 0.15, BODY_Y + 0.12, 0.32, NAVY);
     txt(s, '本日のゴール', { x: L + 0.55, y: BODY_Y + 0.12, w: 2.0, h: 0.32, bold: true, valign: 'middle' });
     ml(s, [['XX', 0], ['XX', 0]], { x: L + 0.55, y: BODY_Y + 0.55, w: W - 0.8, h: 0.7 });
-    shape(s, 'CHEVRON', MID - 0.17, BODY_Y + boxH1 + 0.06, 0.34, 0.24, { rotate: 90, fill: { color: NAVY }, line: { type: 'none' } });
-    shape(s, 'CHEVRON', MID - 0.17, BODY_Y + boxH1 + 0.2, 0.34, 0.24, { rotate: 90, fill: { color: NAVY }, line: { type: 'none' } });
+    hgArrow(pres, s, 'double', MID - 0.19, BODY_Y + boxH1 + 0.06, 0.38, { dir: 'd', tone: 'accent' });
     frameBox(s, L, y2, W, 6.65 - y2, G2);
     icon(s, 'file-text', L + 0.15, y2 + 0.12, 0.32, NAVY);
     txt(s, '本日のアジェンダ', { x: L + 0.55, y: y2 + 0.12, w: 2.4, h: 0.32, bold: true, valign: 'middle' });
@@ -405,8 +403,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
       const y = Y0 + 0.55 + i * rh;
       fill(s, L, y, c1, rh - 0.15, G3);
       ml(s, [['課題／事象' + n, -1], ['XX', 0], ['XX', 1]], { x: L + 0.1, y: y + 0.08, w: c1 - 0.2, h: rh - 0.3 });
-      shape(s, 'CHEVRON', ax, y + rh / 2 - 0.22, 0.2, 0.3, { fill: { color: NAVY }, line: { type: 'none' } });
-      shape(s, 'CHEVRON', ax + 0.13, y + rh / 2 - 0.22, 0.2, 0.3, { fill: { color: NAVY }, line: { type: 'none' } });
+      hgArrow(pres, s, 'triStroke', ax, y + rh / 2 - 0.2, 0.32, { tone: 'accent' });
       txt(s, 'XX', { x: c2x, y: y + 0.05, w: c2 - 0.15, h: 0.35, bold: true });
       line(s, c2x + c2, y, 0, rh - 0.15, G2, 0.75);
       ml(s, [['XX', -1], ['XX', 0], ['XX', 1]], { x: c3x, y: y + 0.05, w: R - c3x, h: rh - 0.25 });

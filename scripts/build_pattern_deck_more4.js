@@ -7,7 +7,7 @@
 module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const num = (o) => Object.assign({ fontFace: 'Arial' }, o);
-  const tri = (s, x, y, w, h, color, rot) => s.addShape(pres.shapes.ISOSCELES_TRIANGLE, { x, y, w, h, rotate: rot === undefined ? 90 : rot, fill: { color: color || G2 }, line: { type: 'none' } });
+  const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
   const bar = (s, x, y, w, h, color) => s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color }, line: { type: 'none' } });
 
   // ---------- P72 主張パネル＋図（各論に一覧の番号を持ち込む） ----------

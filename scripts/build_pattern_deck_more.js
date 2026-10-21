@@ -4,7 +4,7 @@
 // 2026-10-22：見本の値を架空の値（みなと市のバス事業）にし、箱で囲んだ器を「見出し＋線」に改めた（P22・P23・P32）。
 module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
-  const tri = (s, x, y, w, h, color) => s.addShape(pres.shapes.ISOSCELES_TRIANGLE, { x, y, w, h, rotate: 90, fill: { color: color || G2 }, line: { type: 'none' } });
+  const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
   const cell = (t, o) => ({ text: t, options: Object.assign({ fontFace: F, fontSize: 14, valign: 'middle', color: BLACK, }, o) });
   const bottom = (c, w) => [{ type: 'none' }, { type: 'none' }, { pt: w || 0.75, color: c || G4 }, { type: 'none' }];

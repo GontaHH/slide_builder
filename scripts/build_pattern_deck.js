@@ -91,7 +91,7 @@ const chartBase = {
   catAxisLineShow: true, catAxisLineColor: G3, showLegend: false,
 };
 const num = (o) => Object.assign({ fontFace: 'Arial' }, o);
-const tri = (s, x, y, w, h, color) => s.addShape(pres.shapes.ISOSCELES_TRIANGLE, { x, y, w, h, rotate: 90, fill: { color: color || G2 }, line: { type: 'none' } });
+const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
 
 // ---------- 表紙 ----------
 {
