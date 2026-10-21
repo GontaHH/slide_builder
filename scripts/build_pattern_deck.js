@@ -98,7 +98,7 @@ const tri = (s, x, y, w, h, color) => s.addShape(pres.shapes.ISOSCELES_TRIANGLE,
   const s = pres.addSlide();
   pageNo++;
   txt(s, 'パターン見本デッキ', { x: 0.8, y: 2.4, w: 9, h: 0.8, fontSize: 32, bold: true, color: NAVY });
-  txt(s, 'consulting-slide-builder 用　78の型（P01〜P78）＋記号集・アイコン集＋通しの完成例', { x: 0.8, y: 3.25, w: 9.2, h: 0.55, fontSize: 16, color: BLACK });
+  txt(s, 'consulting-slide-builder 用　78の型（P01〜P78）＋記号集・アイコン集・テンプレート集＋通しの完成例', { x: 0.8, y: 3.25, w: 9.2, h: 0.55, fontSize: 16, color: BLACK });
   txt(s, '使い方：伝えたいことを先に決め、合う型を選んで中身を差し替える。各スライドのノートに、パターンID・使う場面・差し替える箇所を記載。\n名称・数値はすべて架空の見本（架空の「みなと市」のバス事業など）。成果物に残さないこと。', { x: 0.8, y: 4.1, w: 9.2, h: 0.9, fontSize: 14, color: G1 });
   line(s, 0.8, 3.85, 9.2, 0, G3, 0.75);
   s.addNotes('表紙。案件で使う際は、このファイルを案件名で別名保存し、最後に見本スライドを削除する。');
@@ -491,6 +491,7 @@ require('./build_pattern_deck_more2.js')(CTX);
 require('./build_pattern_deck_more3.js')(CTX);
 require('./build_pattern_deck_more4.js')(CTX);
 require('./build_symbol_icon_sheets.js')(CTX);
+require('./build_template_sheets.js')(CTX);
 require('./build_example_deck.js')(CTX);
 
 // データラベルの色を系列ごとに決め直す（G-5：濃い塗りの内側は白、淡い塗りと棒の外側は黒）
