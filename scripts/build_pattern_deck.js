@@ -12,7 +12,8 @@ pres.theme = { headFontFace: 'Yu Gothic UI', bodyFontFace: 'Yu Gothic UI' };
 const ICON = iconQueue(pres);
 
 const F = 'Yu Gothic UI';
-const NAVY = '000F78', BLACK = '000000', G1 = '595959', G2 = '7F7F7F', G3 = 'BFBFBF', G4 = 'E7E6E6', G5 = 'F2F2F2', WHITE = 'FFFFFF';
+// 指定色（rules/slide-rules.md B-3）。BLACK・G1 は文字色（63 63 63）、G2＝Gray2、G3・G4＝Gray1、G5＝Blue4、BLUE5＝注目の面
+const NAVY = '000F78', BLACK = '3F3F3F', G1 = '3F3F3F', G2 = '7F7F7F', G3 = 'CCCCCC', G4 = 'CCCCCC', G5 = 'E0EEF8', WHITE = 'FFFFFF', BLUE5 = 'C1DDF1';
 const L = 0.315, R = 10.833 - 0.315, W = R - L;           // 左右余白0.8cm
 const BODY_Y = 1.55, BODY_B = 6.75;
 
@@ -58,7 +59,7 @@ const MSG = '【対象】の【指標】は【期間】で【数値A】増加し
 const chartBase = {
   catAxisLabelFontFace: 'Arial', valAxisLabelFontFace: 'Arial', dataLabelFontFace: 'Arial',
   catAxisLabelFontSize: 14, dataLabelFontSize: 14, catAxisLabelColor: BLACK, dataLabelColor: BLACK,
-  valAxisHidden: true, valGridLine: { style: 'none' }, catGridLine: { style: 'none' },
+  valAxisHidden: true, valAxisLabelColor: BLACK, valAxisLineColor: G3, valGridLine: { style: 'none' }, catGridLine: { style: 'none' },
   catAxisLineShow: true, catAxisLineColor: G3, showLegend: false,
 };
 
@@ -90,7 +91,7 @@ const chartBase = {
     line(s, L, y + 0.82, W, 0, G4, 0.75);
     y += 1.0;
   });
-  s.addShape(pres.shapes.RECTANGLE, { x: L, y: y + 0.15, w: W, h: 1.35, fill: { color: NAVY, transparency: 90 }, line: { color: NAVY, width: 1.5 } });
+  s.addShape(pres.shapes.RECTANGLE, { x: L, y: y + 0.15, w: W, h: 1.35, fill: { color: BLUE5 }, line: { color: NAVY, width: 1.5 } });
   txt(s, '提言', { x: L + 0.2, y: y + 0.3, w: 1.0, h: 0.3, fontSize: 14, bold: true, color: NAVY });
   txt(s, '【打ち手A】を【時期】までに実行し、並行して【打ち手B】の検証に着手する。\n初年度は【体制】を立ち上げ、【KPI】で進捗を管理する', { x: L + 1.25, y: y + 0.3, w: W - 1.45, h: 1.0, fontSize: 14, bold: true, color: NAVY });
 }
@@ -148,7 +149,7 @@ const chartBase = {
     { name: '区分B', labels, values: [35, 33, 30] },
     { name: '区分C', labels, values: [15, 22, 32] },
     { name: 'その他', labels, values: [10, 10, 10] },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.6, h: 4.65, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 70, chartColors: ['595959', '7F7F7F', NAVY, 'A6A6A6'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.6, h: 4.65, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 70, chartColors: ['7F7F7F', 'CCCCCC', NAVY, 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
   // 直接ラベル（凡例の代わり）
   const names = [['その他', 2.55], ['区分C', 3.35], ['区分B', 4.45], ['区分A', 5.6]];
   names.forEach(([n, y]) => txt(s, n, { x: 8.05, y, w: 1.2, h: 0.3, fontSize: 14, color: n === '区分C' ? NAVY : BLACK, bold: n === '区分C' }));
@@ -332,7 +333,7 @@ const chartBase = {
   const s = frame('P15', '3　打ち手', '6つの打ち手のうち、効果も実現性も高いのは【打ち手A】と【打ち手B】である。まずこの2つに資源を集中し、残りは中期の検討課題とする', '打ち手の優先順位', '（縦軸：効果、横軸：実現性）',
     '使う場面：2軸での優先順位付け、ポジショニング。軸の定義と各象限の意味を明記。推奨象限だけ紺。\n差し替え：軸の名前、項目と位置。');
   const X = L + 1.0, Y = 2.15, S = 4.3, Wd = 7.4;
-  s.addShape(pres.shapes.RECTANGLE, { x: X + Wd / 2, y: Y, w: Wd / 2, h: S / 2, fill: { color: NAVY, transparency: 90 }, line: { type: 'none' } });
+  s.addShape(pres.shapes.RECTANGLE, { x: X + Wd / 2, y: Y, w: Wd / 2, h: S / 2, fill: { color: BLUE5 }, line: { type: 'none' } });
   line(s, X, Y + S / 2, Wd, 0, G2, 1); line(s, X + Wd / 2, Y, 0, S, G2, 1);
   txt(s, '効果 大', { x: L, y: Y, w: 0.95, h: 0.3, fontSize: 14, color: G1 });
   txt(s, '効果 小', { x: L, y: Y + S - 0.3, w: 0.95, h: 0.3, fontSize: 14, color: G1 });
@@ -390,8 +391,8 @@ const chartBase = {
     { name: 'ややそう思う', labels, values: [20, 22, 25, 24, 22].reverse() },
     { name: 'どちらでもない', labels, values: [15, 16, 18, 20, 17].reverse() },
     { name: 'そう思わない', labels, values: [13, 14, 16, 18, 16].reverse() },
-  ], Object.assign({}, chartBase, { x: L, y: 2.45, w: W, h: 4.2, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 45, chartColors: [NAVY, '595959', '7F7F7F', 'A6A6A6'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
-  const lg = [['そう思う', NAVY], ['ややそう思う', '595959'], ['どちらでもない', '7F7F7F'], ['そう思わない', 'A6A6A6']];
+  ], Object.assign({}, chartBase, { x: L, y: 2.45, w: W, h: 4.2, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 45, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+  const lg = [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']];
   lg.forEach(([n, c], i) => { const x = L + 1.6 + i * 2.25; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.07, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.02, w: 1.9, h: 0.3, fontSize: 14, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
 }
 
@@ -433,7 +434,7 @@ const chartBase = {
   });
 }
 
-const CTX = { pres, frame, txt, line, rect, chartBase, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y } };
+const CTX = { pres, frame, txt, line, rect, chartBase, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y } };
 require('./build_pattern_deck_more.js')(CTX);
 require('./build_pattern_deck_more2.js')(CTX);
 require('./build_pattern_deck_more3.js')(CTX);
@@ -442,7 +443,7 @@ require('./build_example_deck.js')(CTX);
 
 // データラベルの色を系列ごとに決め直す（G-5：濃い塗りの内側は白、淡い塗りと棒の外側は黒）
 // pptxgenjs はラベル色をグラフ全体で1色しか指定できないため、書き出し後に系列単位で直す
-const DARK = ['000F78', '595959', '7F7F7F', '404040', '000000'];
+const DARK = ['000F78', '7F7F7F', '3C64AA', '3F3F3F'];
 function fixLabelColors(xml) {
   const stacked = /<c:grouping val="(stacked|percentStacked)"\/>/.test(xml);
   return xml.replace(/<c:ser>[\s\S]*?<\/c:ser>/g, ser => {

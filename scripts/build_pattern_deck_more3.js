@@ -3,8 +3,8 @@
 // カスタマージャーニー、体制図、ワークストリーム計画、年表、選択肢カード、関係者マップ）を、本スキルの規定で作り直したもの。
 // 見本の値は【】の空欄ではなく、それらしいダミー値にして、完成形の見た目を確かめられるようにしている。
 module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
-  const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W } = C;
-  const TINT = { color: NAVY, transparency: 90 };
+  const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BLUE5 } = C;
+  const TINT = { color: BLUE5 };
   const shape = (s, type, x, y, w, h, o) => s.addShape(pres.shapes[type], Object.assign({ x, y, w, h }, o));
   const fillRect = (s, x, y, w, h, color) => shape(s, 'RECTANGLE', x, y, w, h, { fill: { color }, line: { type: 'none' } });
   const dot = (s, cx, cy, d, color, lineColor) => shape(s, 'OVAL', cx - d / 2, cy - d / 2, d, d, { fill: { color }, line: lineColor ? { color: lineColor, width: 1 } : { type: 'none' } });

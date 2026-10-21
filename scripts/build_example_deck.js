@@ -1,7 +1,7 @@
 // 通しの完成例：架空の地方鉄道「みなと鉄道」の運営形態の見直し（24枚）
 // 路線・数値はすべて架空。数値は互いに整合するよう設計し、計算値は検算済み（docs/example-calc.md 参照）。
 module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
-  const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y } = C;
+  const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const SRC = '注）路線・数値はすべて架空の完成例\n出所）架空のデータを基に作成';
   const OPT = (src) => ({ sticker: '架空の例', rawNotes: true, source: src || SRC });
   const N = (type, ev, memo) => `完成例（架空）\n使用した型：${type}\nエビデンスID：${ev}${memo ? '\n' + memo : ''}`;
@@ -57,7 +57,7 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
       line(s, L, y + 0.85, W, 0, G4, 0.75);
       y += 1.02;
     });
-    s.addShape(pres.shapes.RECTANGLE, { x: L, y: y + 0.12, w: W, h: 1.4, fill: { color: NAVY, transparency: 90 }, line: { color: NAVY, width: 1.5 } });
+    s.addShape(pres.shapes.RECTANGLE, { x: L, y: y + 0.12, w: W, h: 1.4, fill: { color: BLUE5 }, line: { color: NAVY, width: 1.5 } });
     txt(s, '提言', { x: L + 0.2, y: y + 0.3, w: 1.0, h: 0.3, bold: true, color: NAVY });
     txt(s, '上下分離（案B）を基本方針とし、2026年度に法定協議会を設けて実施計画を策定する。\n2028年4月の移行を目指し、並行して増収策で鉄道会社の収支を黒字にする', { x: L + 1.25, y: y + 0.3, w: W - 1.45, h: 1.05, bold: true, color: NAVY });
   }
@@ -106,7 +106,7 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
       N('P05 100%積上げ', 'E-02（定期券種別データ・アンケート）'), OPT());
     const labels = ['2014年度', '2024年度'];
     s.addChart(pres.charts.BAR, [{ name: '通学', labels, values: [52, 46] }, { name: '通勤', labels, values: [30, 28] }, { name: '通院・買物', labels, values: [12, 16] }, { name: '観光', labels, values: [6, 10] }],
-      Object.assign({}, chartBase, { x: L, y: 2.1, w: 6.6, h: 4.55, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 80, chartColors: [NAVY, '595959', '7F7F7F', 'A6A6A6'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+      Object.assign({}, chartBase, { x: L, y: 2.1, w: 6.6, h: 4.55, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 80, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
     [['観光', 2.45, false], ['通院・買物', 2.95, false], ['通勤', 3.75, false], ['通学', 5.15, true]].forEach(([n, y, key]) => txt(s, n, { x: L + 6.75, y, w: 1.5, h: 0.3, bold: key, color: key ? NAVY : BLACK }));
     txt(s, '−6pt', { x: L + 8.3, y: 5.15, w: 1.0, h: 0.3, bold: true, color: NAVY, fontFace: 'Arial' });
     txt(s, '＋4pt', { x: L + 8.3, y: 2.45, w: 1.0, h: 0.3, color: G1, fontFace: 'Arial' });
@@ -143,8 +143,8 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     s.addChart(pres.charts.BAR, [
       { name: 'そう思う', labels, values: [41, 48, 35, 37, 45].reverse() }, { name: 'ややそう思う', labels, values: [27, 22, 27, 28, 29].reverse() },
       { name: 'どちらでもない', labels, values: [18, 16, 22, 20, 15].reverse() }, { name: 'そう思わない', labels, values: [14, 14, 16, 15, 11].reverse() },
-    ], Object.assign({}, chartBase, { x: L, y: 2.45, w: W, h: 4.2, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 45, chartColors: [NAVY, '595959', '7F7F7F', 'A6A6A6'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
-    [['そう思う', NAVY], ['ややそう思う', '595959'], ['どちらでもない', '7F7F7F'], ['そう思わない', 'A6A6A6']].forEach(([n, c], i) => { const x = L + 1.6 + i * 2.25; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.07, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.02, w: 1.9, h: 0.3, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
+    ], Object.assign({}, chartBase, { x: L, y: 2.45, w: W, h: 4.2, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 45, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+    [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']].forEach(([n, c], i) => { const x = L + 1.6 + i * 2.25; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.07, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.02, w: 1.9, h: 0.3, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
   }
 
   // ---------- 第2章 ----------
@@ -340,7 +340,7 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
   {
     const s = frame('EX', '4　ご判断いただきたい事項', '本日は、上下分離を基本方針とし、2026年度に協議会を設けることをご判断いただきたい。決定すれば2028年4月の移行に間に合う', null, null,
       N('P32 意思決定ページ', 'E-07・E-10'), OPT());
-    s.addShape(pres.shapes.RECTANGLE, { x: L, y: BODY_Y, w: W - 1.2, h: 0.75, fill: { color: NAVY, transparency: 90 }, line: { color: NAVY, width: 1.25 } });
+    s.addShape(pres.shapes.RECTANGLE, { x: L, y: BODY_Y, w: W - 1.2, h: 0.75, fill: { color: BLUE5 }, line: { color: NAVY, width: 1.25 } });
     txt(s, '決めていただきたいこと', { x: L + 0.2, y: BODY_Y, w: 2.6, h: 0.75, valign: 'middle', bold: true, color: NAVY });
     txt(s, '上下分離（案B）を基本方針とし、2026年6月に法定協議会を設置すること', { x: L + 2.9, y: BODY_Y, w: W - 4.3, h: 0.75, valign: 'middle', bold: true, color: NAVY });
     const lw = 5.6;

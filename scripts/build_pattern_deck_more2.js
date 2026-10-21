@@ -1,7 +1,7 @@
 // 追加の型 P34〜P53（2026-10 追加・第2弾）
 // 外資系コンサルの公開資料（経産省委託調査報告書など）に多い見せ方と、Jinba 型カタログの残りの型を、本スキルの規定で作り直したもの。
 module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
-  const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y } = C;
+  const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
   const tri = (s, x, y, w, h, color) => s.addShape(pres.shapes.ISOSCELES_TRIANGLE, { x, y, w, h, rotate: 90, fill: { color: color || G2 }, line: { type: 'none' } });
   const cell = (t, o) => ({ text: t, options: Object.assign({ fontFace: F, fontSize: 14, valign: 'middle', color: BLACK }, o) });
@@ -18,7 +18,7 @@ module.exports = function ({ pres, frame, txt, line, rect, chartBase, C }) {
     line(s, L, 2.45, W, 0, G2, 1);
     [['論点1　【論点名】', 'p.4–6', 'p.7–8', 'p.9'], ['論点2　【論点名】', 'p.10–11', 'p.12', 'p.13'], ['論点3　【論点名】', 'p.14–16', 'p.17–19', 'p.20–22'], ['論点4　【論点名】', 'p.23', 'p.24', 'p.25']].forEach((r, i) => {
       const y = 2.6 + i * 0.95, key = i === 2;
-      if (key) s.addShape(pres.shapes.RECTANGLE, { x: L, y: y - 0.08, w: W, h: 0.8, fill: { color: NAVY, transparency: 90 }, line: { type: 'none' } });
+      if (key) s.addShape(pres.shapes.RECTANGLE, { x: L, y: y - 0.08, w: W, h: 0.8, fill: { color: BLUE5 }, line: { type: 'none' } });
       txt(s, r[0], { x: L + 0.1, y, w: lw - 0.2, h: 0.64, valign: 'middle', bold: true, color: key ? NAVY : BLACK });
       r.slice(1).forEach((p, j) => txt(s, p, { x: L + lw + j * cw, y, w: cw, h: 0.64, align: 'center', valign: 'middle', fontFace: 'Arial', color: key ? NAVY : BLACK, bold: key }));
       line(s, L, y + 0.8, W, 0, G4, 0.75);

@@ -31,8 +31,8 @@ module.exports = function ({ pres, frame, txt, line, icon, C }) {
   // ---------- S01 記号集①：矢印 ----------
   sheet('S01', '矢印は「流れ」「計画」「やり取り」「合流」「循環」の意味だけで使い分ける。紺の矢印は1枚に1本までとし、それ以外はグレーの細線で描く', '矢印の使い分け',
     '記号集①。関連する型：P12 ポンチ絵、P45 循環サイクル、P47 分岐と判断、P71 関係者マップ。\n図形はこのスライドからコピーして使う。色・太さの決まりは docs/symbols.md。', [
-      ['流れの矢印', 'モノ・お金・データの流れ。線の上に流れるものを書く（グレー、1pt）', (s, x, y) => arr(s, x, y, G2, 1)],
-      ['強調の矢印', '変化する流れ1本だけに使う（紺、1.75pt）', (s, x, y) => arr(s, x, y, NAVY, 1.75)],
+      ['流れの矢印', 'モノ・お金・データの流れ。線の上に流れるものを書く（Gray2、1pt）', (s, x, y) => arr(s, x, y, G2, 1)],
+      ['強調の矢印', '変化する流れ1本だけに使う（Navy、1.75pt）', (s, x, y) => arr(s, x, y, NAVY, 1.75)],
       ['点線の矢印', '将来の計画、目指す位置、間接的な関係', (s, x, y) => arr(s, x, y, G2, 1, { dashType: 'dash' })],
       ['双方向の矢印', '相互のやり取り。片方向で言えるなら片方向にする', (s, x, y) => arr(s, x, y, G2, 1, { beginArrowType: 'triangle' })],
       ['合流の矢印', '複数の要素が1つにまとまる。分岐はこの逆向き', (s, x, y) => { ln(s, x, y - 0.22, 0.6, 0.22, G2, 1); shape(s, 'LINE', x, y, 0.6, 0.22, { flipV: true, line: { color: G2, width: 1 } }); ln(s, x + 0.6, y, 0.7, 0, G2, 1, { endArrowType: 'triangle' }); }],
@@ -42,12 +42,12 @@ module.exports = function ({ pres, frame, txt, line, icon, C }) {
   // ---------- S02 記号集②：線と注釈 ----------
   sheet('S02', '因果・順序・伸び・差・節目・区切りは、それぞれ決まった1つの図形で示す。囲みや塗りで区切らず、細い線と余白で要素を分ける', '線と注釈の使い分け',
     '記号集②。関連する型：P03 縦棒＋CAGR、P13 プロセス、P21 前提→帰結、P24 矢羽、P25 ガント、P60 ダンベル。\n図形はこのスライドからコピーして使う。', [
-      ['因果の三角', '左右の間の強い因果。1枚に1つまで（グレーの塗り）', (s, x, y) => shape(s, 'ISOSCELES_TRIANGLE', x + 0.45, y - 0.18, 0.4, 0.36, { rotate: 90, fill: { color: G3 }, line: { type: 'none' } })],
-      ['矢羽', '工程・段階の順序。今の段階だけ紺にする', (s, x, y) => [0, 1, 2].forEach(i => shape(s, i ? 'CHEVRON' : 'PENTAGON', x + i * 0.45, y - 0.18, 0.5, 0.36, { fill: { color: i === 1 ? NAVY : G4 }, line: { type: 'none' } }))],
+      ['因果の三角', '左右の間の強い因果。1枚に1つまで（Gray1の塗り）', (s, x, y) => shape(s, 'ISOSCELES_TRIANGLE', x + 0.45, y - 0.18, 0.4, 0.36, { rotate: 90, fill: { color: G3 }, line: { type: 'none' } })],
+      ['矢羽', '工程・段階の順序。今の段階だけNavyにする', (s, x, y) => [0, 1, 2].forEach(i => shape(s, i ? 'CHEVRON' : 'PENTAGON', x + i * 0.45, y - 0.18, 0.5, 0.36, { fill: { color: i === 1 ? NAVY : G4 }, line: { type: 'none' } }))],
       ['CAGRの矢印', '時系列の伸び率の注釈。棒の上に斜めに置き、率を添える', (s, x, y) => { shape(s, 'LINE', x, y - 0.15, 1.3, 0.3, { flipV: true, line: { color: NAVY, width: 1.25, endArrowType: 'triangle' } }); }],
       ['差分の括弧', '2点の差を「+2.1倍」「−21pt」の形で示す', (s, x, y) => { shape(s, 'RIGHT_BRACKET', x + 0.55, y - 0.28, 0.15, 0.56, { fill: { type: 'none' }, line: { color: NAVY, width: 1 } }); }],
-      ['判断点', '節目・判断の時期。判断の内容を下に書く（黒の◆）', (s, x, y) => { ln(s, x, y, 1.3, 0, G3, 1); shape(s, 'DIAMOND', x + 0.52, y - 0.13, 0.26, 0.26, { fill: { color: BLACK }, line: { type: 'none' } }); }],
-      ['区切りの細線', '要素の区切り。囲みや塗りの代わりに使う（淡いグレー、0.75pt）', (s, x, y) => { ln(s, x, y - 0.1, 1.3, 0, G4, 0.75); ln(s, x, y + 0.1, 1.3, 0, G4, 0.75); }],
+      ['判断点', '節目・判断の時期。判断の内容を下に書く（文字色の◆）', (s, x, y) => { ln(s, x, y, 1.3, 0, G3, 1); shape(s, 'DIAMOND', x + 0.52, y - 0.13, 0.26, 0.26, { fill: { color: BLACK }, line: { type: 'none' } }); }],
+      ['区切りの細線', '要素の区切り。囲みや塗りの代わりに使う（Gray1、0.75pt）', (s, x, y) => { ln(s, x, y - 0.1, 1.3, 0, G4, 0.75); ln(s, x, y + 0.1, 1.3, 0, G4, 0.75); }],
     ]);
 
   // ---------- S03 記号集③：数値の符号 ----------
