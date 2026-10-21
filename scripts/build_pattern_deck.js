@@ -2,12 +2,14 @@
 const pptxgen = require('pptxgenjs');
 const path = require('path');
 const OUT = process.argv[2] || 'pattern-deck.pptx';
+const { iconQueue } = require('./icons.js');
 
 const pres = new pptxgen();
 pres.defineLayout({ name: 'A4_NRI', width: 10.833, height: 7.5 });
 pres.layout = 'A4_NRI';
 pres.title = 'パターン見本デッキ';
 pres.theme = { headFontFace: 'Yu Gothic UI', bodyFontFace: 'Yu Gothic UI' };
+const ICON = iconQueue(pres);
 
 const F = 'Yu Gothic UI';
 const NAVY = '000F78', BLACK = '000000', G1 = '595959', G2 = '7F7F7F', G3 = 'BFBFBF', G4 = 'E7E6E6', G5 = 'F2F2F2', WHITE = 'FFFFFF';
@@ -65,7 +67,7 @@ const chartBase = {
   const s = pres.addSlide();
   pageNo++;
   txt(s, 'パターン見本デッキ', { x: 0.8, y: 2.4, w: 9, h: 0.8, fontSize: 32, bold: true, color: NAVY });
-  txt(s, 'consulting-slide-builder 用　55の型（P01〜P55）＋通しの完成例', { x: 0.8, y: 3.3, w: 9, h: 0.4, fontSize: 16, color: BLACK });
+  txt(s, 'consulting-slide-builder 用　71の型（P01〜P71）＋記号集・アイコン集＋通しの完成例', { x: 0.8, y: 3.3, w: 9, h: 0.4, fontSize: 16, color: BLACK });
   txt(s, '使い方：この見本を複製し、中身だけを差し替えてスライドを作る。各スライドのノートに、パターンID・使う場面・差し替える箇所を記載。\n数値は全てダミー値。成果物に残さないこと。', { x: 0.8, y: 4.1, w: 9.2, h: 0.9, fontSize: 14, color: G1 });
   line(s, 0.8, 3.85, 9.2, 0, G3, 0.75);
   s.addNotes('表紙。案件で使う際は、このファイルを案件名で別名保存し、最後に見本スライドを削除する。');
@@ -271,16 +273,16 @@ const chartBase = {
 // ---------- P12 ポンチ絵（関係図） ----------
 {
   const s = frame('P12', '3　打ち手', '新たな仕組みでは【主体C】が【主体A】と【主体B】の間に入り、資金とデータの流れを一本化する。これにより利用者の負担が大きく減る', '新しい仕組みの全体像', null,
-    '使う場面：関係者の関係、お金・モノ・情報の流れ。要素は6つ以内、各12字以内。変化する箇所だけ紺。アイコンはPowerPointの「アイコン」で単色の線画に差し替える。\n差し替え：主体名、矢印のラベル。');
-  const node = (x, y, label, navy) => {
-    s.addShape(pres.shapes.OVAL, { x, y, w: 1.1, h: 1.1, fill: { color: WHITE }, line: { color: navy ? NAVY : G2, width: navy ? 2 : 1 } });
-    txt(s, 'アイコン', { x, y: y + 0.4, w: 1.1, h: 0.3, fontSize: 11, color: G3, align: 'center' });
+    '使う場面：関係者の関係、お金・モノ・情報の流れ。要素は6つ以内、各12字以内。変化する箇所だけ紺。アイコンは templates/icons/ の線画（アイコン集を参照）を使い、紺にするのは変化する主体だけ。\n差し替え：主体名、矢印のラベル。');
+  const node = (x, y, label, navy, ic) => {
+    s.addShape(pres.shapes.OVAL, { x, y, w: 1.1, h: 1.1, fill: { color: WHITE }, line: { color: navy ? NAVY : G3, width: navy ? 2 : 1 } });
+    ICON.icon(s, ic, x + 0.25, y + 0.25, 0.6, navy ? NAVY : G2);
     txt(s, label, { x: x - 0.5, y: y + 1.18, w: 2.1, h: 0.32, fontSize: 14, bold: navy, color: navy ? NAVY : BLACK, align: 'center' });
   };
-  node(1.0, 2.9, '【主体A】', false);
-  node(4.85, 2.4, '【主体C】', true);
-  node(8.7, 2.9, '【主体B】', false);
-  node(4.85, 5.0, '利用者', false);
+  node(1.0, 2.9, '【主体A】', false, 'building-2');
+  node(4.85, 2.4, '【主体C】', true, 'network');
+  node(8.7, 2.9, '【主体B】', false, 'store');
+  node(4.85, 5.0, '利用者', false, 'users');
   const arr = (x, y, w, h, c, lbl, lx, ly) => { s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: c, width: c === NAVY ? 1.75 : 1, endArrowType: 'triangle' } }); txt(s, lbl, { x: lx, y: ly, w: 2.0, h: 0.3, fontSize: 14, color: c === NAVY ? NAVY : G1, align: 'center', bold: c === NAVY }); };
   arr(2.2, 3.4, 2.55, -0.35, NAVY, 'データ', 2.45, 2.75);
   arr(6.05, 3.05, 2.55, 0.35, NAVY, '資金', 6.3, 2.75);
@@ -431,9 +433,11 @@ const chartBase = {
   });
 }
 
-const CTX = { pres, frame, txt, line, rect, chartBase, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y } };
+const CTX = { pres, frame, txt, line, rect, chartBase, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y } };
 require('./build_pattern_deck_more.js')(CTX);
 require('./build_pattern_deck_more2.js')(CTX);
+require('./build_pattern_deck_more3.js')(CTX);
+require('./build_symbol_icon_sheets.js')(CTX);
 require('./build_example_deck.js')(CTX);
 
 // データラベルの色を系列ごとに決め直す（G-5：濃い塗りの内側は白、淡い塗りと棒の外側は黒）
@@ -451,7 +455,8 @@ function fixLabelColors(xml) {
   });
 }
 
-pres.write({ outputType: 'nodebuffer' })
+ICON.flush()
+  .then(() => pres.write({ outputType: 'nodebuffer' }))
   .then(buf => require('jszip').loadAsync(buf))
   .then(async zip => {
     for (const name of Object.keys(zip.files).filter(n => /^ppt\/charts\/chart\d+\.xml$/.test(n))) {
