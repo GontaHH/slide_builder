@@ -9,7 +9,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
   const cell = (t, o) => ({ text: t, options: Object.assign({ fontFace: F, fontSize: 14, valign: 'middle', color: BLACK, }, o) });
   const bottom = (c, w) => [{ type: 'none' }, { type: 'none' }, { pt: w || 0.75, color: c || G4 }, { type: 'none' }];
   const none = [{ type: 'none' }, { type: 'none' }, { type: 'none' }, { type: 'none' }];
-  const num = (o) => Object.assign({ fontFace: 'Arial' }, o);
+  const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
 
   // ---------- P21 前提→帰結（左に図、右に読み取り） ----------
   {
@@ -21,7 +21,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     s.addChart(pres.charts.BAR, [
       { name: 'その他', labels, values: [0, 0.6, 0.4, 0.3] },
       { name: '注目', labels, values: [2.9, 0, 0, 0] },
-    ], Object.assign({}, chartBase, { x: L, y: 2.1, w: lw, h: 4.4, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 50, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;', catAxisOrientation: 'maxMin' }));
+    ], Object.assign({}, chartBase, { x: L, y: 2.1, w: lw, h: 4.4, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;', catAxisOrientation: 'maxMin' }));
     tri(s, L + lw + 0.12, 3.9, 0.45, 0.32, G2);
     const rx = L + lw + 0.75, rw = R - rx;
     head(s, rx, BODY_Y, rw, '読み取り', { key: true });
@@ -164,7 +164,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
       { name: '楽観', labels, values: [100, 97, 94, 91, 88, 86] },
       { name: '基本', labels, values: [100, 93, 86, 79, 72, 66] },
       { name: '悲観', labels, values: [100, 89, 78, 68, 59, 50] },
-    ], Object.assign({}, chartBase, { x: L, y: 2.1, w: lw - 0.9, h: 4.5, chartColors: [G3, NAVY, G2], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 14, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 40, valAxisMaxVal: 110 }));
+    ], Object.assign({}, chartBase, { x: L, y: 2.1, w: lw - 0.9, h: 4.5, chartColors: [G3, NAVY, G2], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 12, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 40, valAxisMaxVal: 110 }));
     txt(s, '楽観', { x: L + lw - 0.85, y: 2.75, w: 0.85, h: 0.3, color: G1 });
     txt(s, '基本', { x: L + lw - 0.85, y: 3.65, w: 0.85, h: 0.3, bold: true, color: NAVY });
     txt(s, '悲観', { x: L + lw - 0.85, y: 4.55, w: 0.85, h: 0.3, color: G1 });
@@ -295,7 +295,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     sets.forEach(([n, v, key], i) => {
       const x = L + i * (cw + 0.2);
       head(s, x, 2.1, cw, n, { key, align: 'center' });
-      s.addChart(pres.charts.BAR, [{ name: n, labels, values: v }], Object.assign({}, chartBase, { x, y: 2.6, w: cw, h: 3.55, barDir: 'col', barGapWidthPct: 50, chartColors: [key ? NAVY : G3], showValue: false, valAxisMinVal: 0, valAxisMaxVal: 80, catAxisLabelFontSize: 14 }));
+      s.addChart(pres.charts.BAR, [{ name: n, labels, values: v }], Object.assign({}, chartBase, { x, y: 2.6, w: cw, h: 3.55, barDir: 'col', barGapWidthPct: 40, chartColors: [key ? NAVY : G3], showValue: false, valAxisMinVal: 0, valAxisMaxVal: 80, catAxisLabelFontSize: 14 }));
       txt(s, '10年で ' + (v[5] - v[0] >= 0 ? '＋' : '−') + Math.abs(v[5] - v[0]), num({ x, y: 6.2, w: cw, h: 0.35, align: 'center', bold: true, color: key ? NAVY : G1 }));
     });
   }

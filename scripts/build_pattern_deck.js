@@ -66,7 +66,7 @@ function frame(id, chapter, message, slideTitle, unit, notes, opts = {}) {
   // メッセージブロック：紺の縦バー＋章名＋2行メッセージ
   s.addShape(pres.shapes.RECTANGLE, { x: L, y: TOP, w: 0.055, h: 1.02, fill: { color: NAVY }, line: { type: 'none' } });
   txt(s, chapter, { x: L + 0.16, y: TOP, w: W - 0.16, h: 0.24, fontSize: 11, color: G1 });
-  txt(s, message, { x: L + 0.16, y: TOP + 0.26, w: W - 0.16, h: 0.76, fontSize: 20, bold: true, color: NAVY, valign: 'middle', lineSpacingMultiple: 1.0 });
+  txt(s, message, { x: L + 0.16, y: TOP + 0.26, w: W - 0.16, h: 0.76, fontSize: 20, bold: false, color: NAVY, valign: 'middle', lineSpacingMultiple: 1.0 });   // メッセージは太字にしない（B-2）
   line(s, L, TOP + 1.17, W, 0, G3, 0.75);
   // スライドタイトル（14pt太字＋単位・期間11pt、下に全幅のタイトルの線）
   if (slideTitle) {
@@ -86,11 +86,13 @@ function frame(id, chapter, message, slideTitle, unit, notes, opts = {}) {
 
 const chartBase = {
   catAxisLabelFontFace: 'Arial', valAxisLabelFontFace: 'Arial', dataLabelFontFace: 'Arial',
-  catAxisLabelFontSize: 14, dataLabelFontSize: 14, catAxisLabelColor: BLACK, dataLabelColor: BLACK,
+  catAxisLabelFontSize: 12, dataLabelFontSize: 12,   // 図の文字は12pt（B-2）
+  barGapWidthPct: 40,   // 棒の隙間は棒の幅の0.4倍（docs/reference-measurements.md）
+  catAxisLabelColor: BLACK, dataLabelColor: BLACK,
   valAxisHidden: true, valAxisLabelColor: BLACK, valAxisLineColor: G3, valGridLine: { style: 'none' }, catGridLine: { style: 'none' },
   catAxisLineShow: true, catAxisLineColor: G3, showLegend: false,
 };
-const num = (o) => Object.assign({ fontFace: 'Arial' }, o);
+const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
 const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
 
 // ---------- 表紙 ----------
@@ -150,7 +152,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   s.addChart(pres.charts.BAR, [
     { name: '区域拡大前', labels, values: [3.8, 4.1, 4.4, 0, 0, 0] },
     { name: '区域拡大後', labels, values: [0, 0, 0, 5.0, 5.7, 6.5] },
-  ], Object.assign({}, chartBase, { x: L, y: 2.55, w: W, h: 4.15, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 60, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;' }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.55, w: W, h: 4.15, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;' }));
   s.addShape(pres.shapes.LINE, { x: 5.6, y: 2.5, w: 3.8, h: -0.0, line: { color: NAVY, width: 1.25, endArrowType: 'triangle' } });
   txt(s, '年平均 ＋6.7%（2019→2025年度）', { x: 5.3, y: 2.08, w: 4.4, h: 0.32, fontSize: 14, bold: true, color: NAVY, align: 'center' });
 }
@@ -164,7 +166,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   s.addChart(pres.charts.BAR, [
     { name: 'その他', labels, values: v.map((x, i) => labels[i] === 'みなと市' ? 0 : x) },
     { name: '対象', labels, values: v.map((x, i) => labels[i] === 'みなと市' ? x : 0) },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.2, h: 4.65, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 45, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;' }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.2, h: 4.65, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;' }));
   txt(s, '上位3市の平均より\n9回少ない（23回→14回）', { x: 7.9, y: 4.6, w: 2.6, h: 0.7, fontSize: 14, bold: true, color: NAVY });
 }
 
@@ -178,7 +180,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     { name: '買物', labels, values: [35, 33, 30] },
     { name: '通院', labels, values: [15, 22, 32] },
     { name: 'その他', labels, values: [10, 10, 10] },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.6, h: 4.65, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 70, chartColors: ['7F7F7F', 'CCCCCC', NAVY, 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.6, h: 4.65, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: ['7F7F7F', 'CCCCCC', NAVY, 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
   const names = [['その他', 2.55], ['通院', 3.35], ['買物', 4.45], ['通学', 5.6]];
   names.forEach(([n, y]) => txt(s, n, { x: 8.05, y, w: 1.0, h: 0.3, fontSize: 14, color: n === '通院' ? NAVY : BLACK, bold: n === '通院' }));
   txt(s, '＋17pt', num({ x: 8.95, y: 3.35, w: 1.5, h: 0.3, fontSize: 14, bold: true, color: NAVY }));
@@ -248,7 +250,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     { name: 'X', values: xs.concat([32]) },
     { name: '類似市', values: ys.concat([null]) },
     { name: 'みなと市', values: xs.map(() => null).concat([14]) },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.6, h: 4.6, valAxisHidden: false, valAxisLabelFontSize: 14, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 0, valAxisMaxVal: 30, chartColors: [G3, NAVY], lineSize: 0, lineDataSymbolSize: 11, catAxisLabelColor: G1 }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.6, h: 4.6, valAxisHidden: false, valAxisLabelFontSize: 12, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 0, valAxisMaxVal: 30, chartColors: [G3, NAVY], lineSize: 0, lineDataSymbolSize: 11, catAxisLabelColor: G1 }));
   txt(s, 'みなと市\n同規模の市より\n年5回少ない', { x: 8.0, y: 3.55, w: 2.5, h: 1.0, fontSize: 14, bold: true, color: NAVY });
   txt(s, '縦軸：1人当たり年間利用回数（回）\n横軸：人口千人当たりの1日運行本数（本）', { x: 8.0, y: 5.55, w: 2.5, h: 0.9, fontSize: 11, color: G1 });
 }
@@ -262,7 +264,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     { name: '全国', labels, values: [100, 101, 102, 102, 103, 99, 100, 101, 102, 103, 104] },
     { name: '類似市', labels, values: [100, 99, 99, 98, 98, 95, 95, 96, 96, 96, 97] },
     { name: 'みなと市', labels, values: [100, 97, 95, 92, 90, 85, 84, 83, 81, 80, 78] },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 8.2, h: 4.6, chartColors: [G3, G2, NAVY], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 14, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 70, valAxisMaxVal: 110 }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 8.2, h: 4.6, chartColors: [G3, G2, NAVY], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 12, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 70, valAxisMaxVal: 110 }));
   txt(s, '全国', { x: 8.6, y: 2.55, w: 1.8, h: 0.3, fontSize: 14, color: G1 });
   txt(s, '類似市', { x: 8.6, y: 3.25, w: 1.8, h: 0.3, fontSize: 14, color: G1 });
   txt(s, 'みなと市\n全国との差 −26pt', { x: 8.6, y: 4.55, w: 1.9, h: 0.65, fontSize: 14, bold: true, color: NAVY });
@@ -274,7 +276,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     '使う場面：チャートから読み取るべき点が2〜3ある場合。チャート上の番号とキーメッセージ欄の番号を同じ図形のバッジで対応させる。\n差し替え：チャートデータ、読み取り3点。');
   const labels = ['2015', '2017', '2019', '2021', '2023', '2025'];
   s.addChart(pres.charts.BAR, [{ name: '値', labels, values: [5.0, 5.6, 6.1, 6.3, 6.4, 6.5] }],
-    Object.assign({}, chartBase, { x: L, y: 2.5, w: 6.0, h: 4.2, barDir: 'col', barGapWidthPct: 60, chartColors: [G3], showValue: true, dataLabelPosition: 'outEnd', dataLabelFormatCode: '0.0' }));
+    Object.assign({}, chartBase, { x: L, y: 2.5, w: 6.0, h: 4.2, barDir: 'col', barGapWidthPct: 40, chartColors: [G3], showValue: true, dataLabelPosition: 'outEnd', dataLabelFormatCode: '0.0' }));
   const mk = (n, x, y, navy) => { s.addShape(pres.shapes.OVAL, { x, y, w: 0.32, h: 0.32, fill: { color: navy ? NAVY : WHITE }, line: { color: NAVY, width: 1 } }); txt(s, String(n), num({ x, y, w: 0.32, h: 0.32, fontSize: 12, bold: true, color: navy ? WHITE : NAVY, align: 'center', valign: 'middle' })); };
   mk(1, 3.58, 2.1, true); mk(2, 4.53, 2.1, false); mk(3, 5.47, 2.1, false);
   const X = 6.75; let y = 2.15;
@@ -441,7 +443,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     { name: 'ややそう思う', labels, values: [20, 22, 25, 22, 22].reverse() },
     { name: 'どちらでもない', labels, values: [15, 20, 17, 16, 13].reverse() },
     { name: 'そう思わない', labels, values: [13, 18, 14, 12, 10].reverse() },
-  ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 45, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
   const lg = [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']];
   lg.forEach(([n, c], i) => { const x = L + 1.6 + i * 2.1; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.12, w: 1.7, h: 0.3, fontSize: 14, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
 }

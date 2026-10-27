@@ -96,7 +96,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
       N('P03 縦棒の時系列＋CAGR', 'E-01（運行データ）', '検算：158÷210＝0.752（25%減）、年平均−2.8%'), OPT());
     const labels = ['2014', '2016', '2018', '2020', '2022', '2024'];
     s.addChart(pres.charts.BAR, [{ name: '過去', labels, values: [210, 198, 186, 131, 152, 0] }, { name: '直近', labels, values: [0, 0, 0, 0, 0, 158] }],
-      Object.assign({}, chartBase, { x: L, y: 2.15, w: W, h: 4.5, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 60, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;', valAxisMinVal: 0, valAxisMaxVal: 240 }));
+      Object.assign({}, chartBase, { x: L, y: 2.15, w: W, h: 4.5, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;', valAxisMinVal: 0, valAxisMaxVal: 240 }));
     arrow(s, L + 1.4, 2.6, 7.6, 0, NAVY, 1.25);
     txt(s, '年平均 −2.8%（10年で−25%）', { x: L + 3.0, y: 2.2, w: 4.6, h: 0.32, bold: true, color: NAVY, align: 'center' });
   }
@@ -107,7 +107,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
       N('P05 100%積上げ', 'E-02（定期券種別データ・アンケート）'), OPT());
     const labels = ['2014年度', '2024年度'];
     s.addChart(pres.charts.BAR, [{ name: '通学', labels, values: [52, 46] }, { name: '通勤', labels, values: [30, 28] }, { name: '通院・買物', labels, values: [12, 16] }, { name: '観光', labels, values: [6, 10] }],
-      Object.assign({}, chartBase, { x: L, y: 2.1, w: 6.6, h: 4.55, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 80, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+      Object.assign({}, chartBase, { x: L, y: 2.1, w: 6.6, h: 4.55, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
     [['観光', 2.45, false], ['通院・買物', 2.95, false], ['通勤', 3.75, false], ['通学', 5.15, true]].forEach(([n, y, key]) => txt(s, n, { x: L + 6.75, y, w: 1.5, h: 0.3, bold: key, color: key ? NAVY : BLACK }));
     txt(s, '−6pt', { x: L + 8.3, y: 5.15, w: 1.0, h: 0.3, bold: true, color: NAVY, fontFace: 'Arial' });
     txt(s, '＋4pt', { x: L + 8.3, y: 2.45, w: 1.0, h: 0.3, color: G1, fontFace: 'Arial' });
@@ -122,7 +122,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     head(s, L, BODY_Y, lw, '輸送人員の見通し（万人、2025–2045年度（予測））');
     const labels = ['2025', '2030', '2035', '2040', '2045'];
     s.addChart(pres.charts.LINE, [{ name: '楽観', labels, values: [158, 154, 150, 145, 140] }, { name: '基本', labels, values: [158, 148, 138, 128, 118] }, { name: '悲観', labels, values: [158, 142, 126, 110, 95] }],
-      Object.assign({}, chartBase, { x: L, y: 2.05, w: lw - 0.9, h: 4.55, chartColors: [G3, NAVY, G2], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 14, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 80, valAxisMaxVal: 170 }));
+      Object.assign({}, chartBase, { x: L, y: 2.05, w: lw - 0.9, h: 4.55, chartColors: [G3, NAVY, G2], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 12, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 80, valAxisMaxVal: 170 }));
     txt(s, '楽観 140', { x: L + lw - 0.95, y: 2.75, w: 1.0, h: 0.3, color: G1 });
     txt(s, '基本 118', { x: L + lw - 0.95, y: 3.75, w: 1.0, h: 0.3, bold: true, color: NAVY });
     txt(s, '悲観 95', { x: L + lw - 0.95, y: 4.8, w: 1.0, h: 0.3, color: G1 });
@@ -143,7 +143,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     s.addChart(pres.charts.BAR, [
       { name: 'そう思う', labels, values: [41, 48, 35, 37, 45].reverse() }, { name: 'ややそう思う', labels, values: [27, 22, 27, 28, 29].reverse() },
       { name: 'どちらでもない', labels, values: [18, 16, 22, 20, 15].reverse() }, { name: 'そう思わない', labels, values: [14, 14, 16, 15, 11].reverse() },
-    ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 45, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+    ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
     [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']].forEach(([n, c], i) => { const x = L + 1.6 + i * 2.1; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.12, w: 1.7, h: 0.3, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
   }
 
@@ -277,7 +277,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     const labels = ['案A　現行維持', '案C　BRT転換', '案B　上下分離'].reverse();
     const v = [6.3, 2.4, 2.2].reverse();
     s.addChart(pres.charts.BAR, [{ name: 'その他', labels, values: v.map((x, i) => i === 0 ? 0 : x) }, { name: '推奨', labels, values: v.map((x, i) => i === 0 ? x : 0) }],
-      Object.assign({}, chartBase, { x: L, y: 2.15, w: 7.2, h: 3.9, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 60, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;', valAxisMinVal: 0, valAxisMaxVal: 7 }));
+      Object.assign({}, chartBase, { x: L, y: 2.15, w: 7.2, h: 3.9, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;', valAxisMinVal: 0, valAxisMaxVal: 7 }));
     txt(s, '現行維持の約3分の1', { x: L + 7.5, y: 4.95, w: 2.7, h: 0.35, bold: true, color: NAVY });
     txt(s, '−4.1億円／年', { x: L + 7.5, y: 5.3, w: 2.7, h: 0.5, fontSize: 20, bold: true, color: NAVY, fontFace: 'Arial' });
   }

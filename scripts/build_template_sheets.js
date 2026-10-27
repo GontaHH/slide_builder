@@ -11,7 +11,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
   const shape = (s, type, x, y, w, h, o) => s.addShape(pres.shapes[type], Object.assign({ x, y, w, h }, o));
   const fill = (s, x, y, w, h, color) => shape(s, 'RECTANGLE', x, y, w, h, { fill: { color }, line: { type: 'none' } });
   const frameBox = (s, x, y, w, h, color, width) => shape(s, 'RECTANGLE', x, y, w, h, { fill: { type: 'none' }, line: { color: color || G2, width: width || 0.75 } });
-  const num = (o) => Object.assign({ fontFace: 'Arial' }, o);
+  const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
   const XB = [['XX', 0], ['XX', 1]];
   // 箇条書き：第1階層「•」、第2階層「–」を段落の書式で付ける（H-6）。見出しの「■」は level -1
   const ml = (s, items, o) => s.addText(items.map(([t, lv]) => ({
