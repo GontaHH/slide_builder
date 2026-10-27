@@ -71,6 +71,64 @@ def layout_checks(slide, i):
         elif empty > 0.3: out.append(("WARN", f"本体の下{empty:.0%}が空いている（H-7）"))
     return out
 
+# ---- 洗練の検査（rules/slide-rules.md G-6〜G-12「洗練の核心」） ----
+NAVY = "000F78"
+DECIMAL_BIG = re.compile(r"(?<![\d.,])\d{1,3}(?:,\d{3})+\.\d|(?<![\d.,])\d{3,}\.\d")
+
+def _uses_navy(sh):
+    x = etree.tostring(sh._element).decode()
+    if f'val="{NAVY}"' in x: return True
+    if getattr(sh, "has_chart", False) and sh.has_chart:
+        return f'val="{NAVY}"' in sh.chart.part.blob.decode("utf-8", "ignore")
+    return False
+
+def _clusters(boxes, gap=0.25):
+    """近い（gap以内）箱をまとめて1か所と数える。"""
+    groups = []
+    for b in boxes:
+        hit = [g for g in groups if any(b[0] - gap <= c[2] and c[0] - gap <= b[2] and b[1] - gap <= c[3] and c[1] - gap <= b[3] for c in g)]
+        merged = [b] + [c for g in hit for c in g]
+        groups = [g for g in groups if g not in hit] + [merged]
+    return len(groups)
+
+def polish_checks(slide, navy_check=True):
+    out, navy, note_lines, note_chars = [], [], 0, 0
+    for sh in slide.shapes:
+        x, y, w, h = (sh.left or 0) / IN, (sh.top or 0) / IN, (sh.width or 0) / IN, (sh.height or 0) / IN
+        text = sh.text_frame.text.strip() if sh.has_text_frame else ""
+        # G-6 本体の紺（メッセージ欄・ページ番号を除く。近い要素は1か所と数える）
+        if BODY_TOP - 0.35 <= y < BODY_BOTTOM and _uses_navy(sh):
+            navy.append((x, y, x + w, y + h))
+        # G-10 注記・出所の量
+        if y >= BODY_BOTTOM - 0.05 and text.startswith(("注", "出所", "資料")):
+            note_lines += len([l for l in text.splitlines() if l.strip()]); note_chars += len(text)
+        # G-8 100以上の値の小数
+        if BODY_TOP - 0.35 <= y < BODY_BOTTOM and DECIMAL_BIG.search(text):
+            out.append(("WARN", f"100以上の値に小数が付いている（G-8）：{DECIMAL_BIG.search(text).group(0)}"))
+        if getattr(sh, "has_chart", False) and sh.has_chart:
+            root = etree.fromstring(sh.chart.part.blob)
+            fmts = [f.get("formatCode", "") for f in root.iter("{%s}numFmt" % CNS["c"])]
+            vals = [float(v.text) for v in root.findall(".//c:val//c:v", CNS) if re.fullmatch(r"-?\d+(\.\d+)?", v.text or "")]
+            if any(re.search(r"0\.0", f) for f in fmts) and vals and max(abs(v) for v in vals) >= 100:
+                out.append(("WARN", "100以上の値を含むグラフのラベルが小数の書式（G-8）"))
+        # G-12 表のセルの折り返し（3行以上）
+        if getattr(sh, "has_table", False) and sh.has_table:
+            for row in sh.table.rows:
+                for ci, cell in enumerate(row.cells):
+                    cw = sh.table.columns[ci].width / IN
+                    lines = 0
+                    for para in cell.text_frame.paragraphs:
+                        t = "".join(r.text for r in para.runs)
+                        size = max([r.font.size.pt for r in para.runs if r.font.size] or [14])
+                        lines += max(1, -(-zen_len(t) // max(1.0, ((cw - 0.2) * 72) / size))) if t else 0
+                    if lines >= 3:
+                        out.append(("WARN", f"表のセルが{int(lines)}行に折り返す（G-12）：{cell.text_frame.text.strip()[:12]}")); break
+    n = _clusters(navy)
+    if navy_check and n >= 2: out.append(("WARN", f"本体の紺が{n}か所ある。紺はメッセージが指す1か所に絞る（G-6）"))
+    if note_lines >= 3: out.append(("WARN", f"注記・出所が{note_lines}行ある。2行までに絞り、定義は本体の見出しへ（G-10）"))
+    elif note_chars > 150: out.append(("WARN", f"注記・出所が{note_chars}字ある。出所は略記し、定義の説明を入れない（G-10）"))
+    return out
+
 # ---- ガイド線の検査（rules/slide-rules.md B-1「ガイド線」） ----
 DEFAULT_GUIDES_CM = {"title_top": 8.80, "body_top": 5.40, "left": -13.20, "right": 13.20}
 
@@ -169,11 +227,16 @@ def main(path, sample=False):
             if re.match(r"^(この|その|これ|それ)", msg): fails.append((i, "メッセージが他ページを指示語で参照"))
             if re.match(r"^[^。]{1,12}[：:]", msg): fails.append((i, "メッセージに「見出し：」の前置き"))
             if re.search(r"(です|ます)。?$", msg): fails.append((i, "メッセージが「です・ます」調"))
+            if re.search(r"\d[\d,.]*\s?[万億千]?(円|人|件|t|トン|回|本)\s?[／/]\s?(年|人|日|月)", msg): warns.append((i, "メッセージの単位を記号で書いている。「年142億円」のように和文で書く（G-8）"))
         if body_chars > 200: warns.append((i, f"本体の文字が多い（約{body_chars}字）"))
         if i > 1 and msg:
             for tag, m in layout_checks(s, i):
                 (fails if tag == "FAIL" else warns).append((i, m))
             for tag, m in guide_checks(s, guides):
+                (fails if tag == "FAIL" else warns).append((i, m))
+            notes0 = s.notes_slide.notes_text_frame.text if s.has_notes_slide else ""
+            # 見本デッキの記号集・アイコン集・パーツ集・テンプレート集は部品の一覧なので、紺の数は数えない
+            for tag, m in polish_checks(s, navy_check=not (sample and not re.match(r"(パターンID：P\d|完成例)", notes0))):
                 (fails if tag == "FAIL" else warns).append((i, m))
         notes = s.notes_slide.notes_text_frame.text if s.has_notes_slide else ""
         if i > 1 and not re.search(r"E-?\d|エビデンス|P\d\d", notes): warns.append((i, "ノートにエビデンスID・パターンIDなし"))

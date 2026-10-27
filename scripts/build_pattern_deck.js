@@ -27,7 +27,7 @@ const BODY_Y = SLIDE_H / 2 - GUIDE.bodyTop * CM, BODY_B = 6.75;                 
 const RULE = {
   title: { color: BLACK, width: 1.25 },   // スライドタイトル（何のデータか）の下：全幅
   head: { color: G2, width: 1.0 },        // 列・欄の見出しの下
-  key: { color: NAVY, width: 1.25 },      // 結論側の見出しの下（1スライド1か所）
+  key: { color: BLACK, width: 1.25 },     // 結論側の見出しの下：太さで区別し、紺は使わない（紺は本体の1か所だけ、G-6）
   row: { color: G3, width: 0.75 },        // 行の区切り（最終行の下には引かない）
 };
 
@@ -43,9 +43,9 @@ function line(s, x, y, w, h, color, width, extra) {
 function rect(s, x, y, w, h, o) {
   s.addShape(pres.shapes.RECTANGLE, Object.assign({ x, y, w, h, fill: { color: WHITE }, line: { color: G3, width: 0.75 } }, o));
 }
-// 欄の見出し：14pt太字＋下に見出しの線（key＝結論側は紺）。箱で囲まず、見出しと線で器を作る（H-1）
+// 欄の見出し：14pt太字＋下に見出しの線（key＝結論側は文字色の太い線。紺にしない、G-6）。箱で囲まず、見出しと線で器を作る（H-1）
 function head(s, x, y, w, t, o = {}) {
-  txt(s, t, Object.assign({ x, y, w, h: 0.32, bold: true, color: o.key ? NAVY : BLACK, align: o.align || 'left', valign: 'bottom' }, o.text || {}));
+  txt(s, t, Object.assign({ x, y, w, h: 0.32, bold: true, color: BLACK, align: o.align || 'left', valign: 'bottom' }, o.text || {}));
   const r = o.key ? RULE.key : RULE.head;
   line(s, x, y + 0.38, w, 0, r.color, r.width);
 }
@@ -532,5 +532,7 @@ ICON.flush()
     const mname = 'ppt/slideMasters/slideMaster1.xml';
     zip.file(mname, (await zip.file(mname).async('string')).replace('</p:sldMaster>', ext + '</p:sldMaster>'));
     await require('fs').promises.writeFile(OUT, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
+    // 本体の紺を主役の1か所に絞る（G-6）。読み取り・見出し・番号の紺は文字色に、ほかの紺の塗りは Gray2 にする
+    require('child_process').execFileSync('python3', [path.join(__dirname, 'one_navy.py'), OUT], { stdio: 'inherit' });
     console.log('written', OUT);
   });

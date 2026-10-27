@@ -15,7 +15,8 @@ Claude のスキル **consulting-slide-builder**（スライド作成）と **sl
 | `patterns/refs.json` | 型ごとの参考ページID（見本デッキのノートに自動で入る） |
 | `templates/` | 自作のマスター・テンプレート |
 | `templates/icons/` | アイコン集の SVG 70種（Lucide、ISCライセンス。グレー・線幅1.5に整えたもの） |
-| `scripts/check_deck.py` | 機械チェック（`python3 scripts/check_deck.py deck.pptx`、見本は `--sample`）。色・文字の大きさ・メッセージに加え、版面（本体の下の空き、塗りと枠線の重なり、囲みの数、塗りの面の数、文字のはみ出しの見積もり、記号の直打ち、表の最終行の罫線。rules H章）を検査 |
+| `scripts/check_deck.py` | 機械チェック（`python3 scripts/check_deck.py deck.pptx`、見本は `--sample`）。色・文字の大きさ・メッセージに加え、版面（本体の下の空き、塗りと枠線の重なり、囲みの数、塗りの面の数、文字のはみ出しの見積もり、記号の直打ち、表の最終行の罫線。rules H章）を検査。洗練の検査（本体の紺の数、注記・出所の行数、100以上の値の小数、表のセルの折り返し、メッセージの単位、G-6〜G-12）も行う |
+| `scripts/one_navy.py` | 本体の紺を主役の1か所に絞る（`python3 scripts/one_navy.py deck.pptx`）。見本デッキの生成時にも自動で通る（G-6） |
 | `scripts/build_pattern_deck.js` | 見本デッキの再生成（`node scripts/build_pattern_deck.js patterns/pattern-deck.pptx`、pptxgenjs と sharp が必要：`npm i pptxgenjs sharp`）。P21以降は `build_pattern_deck_more*.js`（P72〜P78は `_more4.js`）、記号集・アイコン集は `build_symbol_icon_sheets.js`、パーツ集・テンプレート集は `build_template_sheets.js`、アイコンの目録は `icons.js` |
 | `scripts/add_guides.py` | スライドマスターにガイド線（①横+8.80 ②横+5.40 ③縦−13.20 ④縦+13.20 ⑤縦0、cm）を入れる（`python3 scripts/add_guides.py deck.pptx`）。見本デッキは生成時に入る |
 | `docs/chart-and-source-notes.md` | 図表・出所・注記・図解の作法の根拠（調べた資料とURL）と、出所の書き方の例 |
