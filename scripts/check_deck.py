@@ -129,6 +129,29 @@ def polish_checks(slide, navy_check=True):
     elif note_chars > 150: out.append(("WARN", f"注記・出所が{note_chars}字ある。出所は略記し、定義の説明を入れない（G-10）"))
     return out
 
+# ---- 中身の厚みの検査（rules/slide-rules.md I-1：同じ数字を描き方を変えて繰り返さない） ----
+KEYNUM = re.compile(r"(?<![\d.,])\d{1,3}(?:,\d{3})+(?:\.\d+)?(?![\d])|(?<![\d.,])\d+\.\d+(?![\d])|(?<![\d.,])\d{3,}(?![\d.,])")
+
+def repeated_numbers(prs, limit=4):
+    """本体（メッセージ・注記を除く）に出る3桁以上・小数の数字が、limit枚以上のページに出ていればWARN。年（1900〜2099）は除く。"""
+    where = {}
+    for i, s in enumerate(prs.slides, 1):
+        if i == 1: continue
+        found = set()
+        for sh in s.shapes:
+            y = (sh.top or 0) / IN
+            if not (BODY_TOP - 0.35 <= y < BODY_BOTTOM) or not sh.has_text_frame: continue
+            for n in KEYNUM.findall(sh.text_frame.text):
+                v = n.replace(",", "")
+                if re.fullmatch(r"(19|20)\d\d", v): continue
+                found.add(v)
+        for v in found: where.setdefault(v, []).append(i)
+    out = []
+    for v, ps in sorted(where.items(), key=lambda kv: -len(kv[1])):
+        if len(ps) >= limit:
+            out.append(f"同じ数字「{v}」が{len(ps)}ページに出ている（p{', p'.join(map(str, ps))}）。描き方を変えて繰り返さず、各ページで新しい事実を示す（I-1）")
+    return out[:5]
+
 # ---- ガイド線の検査（rules/slide-rules.md B-1「ガイド線」） ----
 DEFAULT_GUIDES_CM = {"title_top": 8.80, "body_top": 5.40, "left": -13.20, "right": 13.20}
 
@@ -212,12 +235,17 @@ def main(path, sample=False):
             if not sample and PLACEHOLDER.search(t): fails.append((i, f"仮の文字が残存：{t[:20]}"))
             if "【要確認】" in t: warns.append((i, "【要確認】が残存"))
             sizes = [r.font.size.pt for p in sh.text_frame.paragraphs for r in p.runs if r.font.size]
-            if sizes and max(sizes) >= 19.5 and top < 0.2: msg = t.replace("\n", ""); continue
+            if sizes and max(sizes) >= 19.5 and top < 0.2:
+                msg = t.replace("\n", "")
+                if any(r.font.bold for p in sh.text_frame.paragraphs for r in p.runs if r.text.strip()):
+                    warns.append((i, "メッセージが太字。標準の太さにする（B-2）"))
+                continue
             zone_ok = top > 0.88 or top < 0.08 or t.startswith(SMALL_OK) or len(t) <= 8
+            # B-2：本文・読み取り14pt、図の文字・補足12pt、注記9pt。12pt未満は注記・出所・章名だけ
             bad = [r for p in sh.text_frame.paragraphs for r in p.runs
-                   if r.font.size and r.font.size.pt < 14 and r.text.strip() and not r.text.strip().startswith(SMALL_OK)]
+                   if r.font.size and r.font.size.pt < 12 and r.text.strip() and not r.text.strip().startswith(SMALL_OK)]
             if bad and not zone_ok:
-                fails.append((i, f"14pt未満（{bad[0].font.size.pt:g}pt）：{bad[0].text.strip()[:20]}"))
+                fails.append((i, f"12pt未満（{bad[0].font.size.pt:g}pt）：{bad[0].text.strip()[:20]}"))
             if 0.25 < top < 0.9 and not t.startswith(("注", "出所")): body_chars += len(t)
         if i > 1 and msg:
             n = len(msg)
@@ -240,6 +268,9 @@ def main(path, sample=False):
                 (fails if tag == "FAIL" else warns).append((i, m))
         notes = s.notes_slide.notes_text_frame.text if s.has_notes_slide else ""
         if i > 1 and not re.search(r"E-?\d|エビデンス|P\d\d", notes): warns.append((i, "ノートにエビデンスID・パターンIDなし"))
+    if not sample:
+        for m in repeated_numbers(prs):
+            warns.append((0, m))
     for tag, items in (("FAIL", fails), ("WARN", warns)):
         for p, m in items: print(f"{tag}  p{p:02d}  {m}")
     print(f"--- FAIL {len(fails)} / WARN {len(warns)}")

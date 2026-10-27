@@ -10,7 +10,7 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
   const dot = (s, cx, cy, d, color, lineColor) => shape(s, 'OVAL', cx - d / 2, cy - d / 2, d, d, { fill: { color }, line: lineColor ? { color: lineColor, width: 1 } : { type: 'none' } });
   const arrow = (s, x, y, w, h, color, width, dash) => shape(s, 'LINE', x, y, w, h, { line: { color: color || G2, width: width || 1, endArrowType: 'triangle', dashType: dash || 'solid' } });
   const badge = (s, x, y, t, key) => { dot(s, x + 0.16, y + 0.16, 0.32, key ? NAVY : G2); txt(s, t, { x, y, w: 0.32, h: 0.32, fontSize: 12, bold: true, color: WHITE, align: 'center', valign: 'middle', fontFace: 'Arial' }); };
-  const num = (o) => Object.assign({ fontFace: 'Arial' }, o);
+  const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
   const colHead = (s, x, y, w, t, o) => txt(s, t, Object.assign({ x, y, w, h: 0.32, bold: true, color: G1 }, o || {}));
 
   // ---------- P56 時間配分付きアジェンダ ----------

@@ -21,6 +21,7 @@ Claude のスキル **consulting-slide-builder**（スライド作成）と **sl
 | `scripts/add_guides.py` | スライドマスターにガイド線（①横+8.80 ②横+5.40 ③縦−13.20 ④縦+13.20 ⑤縦0、cm）を入れる（`python3 scripts/add_guides.py deck.pptx`）。見本デッキは生成時に入る |
 | `docs/chart-and-source-notes.md` | 図表・出所・注記・図解の作法の根拠（調べた資料とURL）と、出所の書き方の例 |
 | `docs/example-calc.md` | 完成例の数値の検算表 |
+| `docs/reference-measurements.md` | 手本（MCK04）の実測値（文字の段差・余白・線・棒の隙間）と作図の既定値。実物と並べて比べるときの相手（I-5・I-6） |
 | `docs/symbols.md` | 記号集：矢印・線・数値の符号・印の使い分けと決まり |
 | `docs/icons.md` | アイコン集：70種の一覧と使い方の決まり |
 | `docs/workflow.md` | スキルの処理の流れ（何を入力に、どのファイルの何を参照し、何をするか） |

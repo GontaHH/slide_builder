@@ -8,7 +8,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
   const cell = (t, o) => ({ text: t, options: Object.assign({ fontFace: F, fontSize: 14, valign: 'middle', color: BLACK }, o) });
   const bottom = (c, w) => [{ type: 'none' }, { type: 'none' }, { pt: w || 0.75, color: c || G4 }, { type: 'none' }];
   const none = [{ type: 'none' }, { type: 'none' }, { type: 'none' }, { type: 'none' }];
-  const num = (o) => Object.assign({ fontFace: 'Arial' }, o);
+  const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
   const box = (s, x, y, w, h, t, key, o) => { rect(s, x, y, w, h, { line: { color: key ? NAVY : G3, width: key ? 1.5 : 0.75 } }); txt(s, t, Object.assign({ x: x + 0.15, y, w: w - 0.3, h, valign: 'middle', align: 'center', bold: key, color: key ? NAVY : BLACK }, o || {})); };
 
   // ---------- P34 全体マップ ----------
@@ -142,7 +142,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     const labels = ['2015', '2017', '2019', '2021', '2023', '2025'];
     const A = [40, 41, 40, 41, 40, 41], B = [30, 30, 31, 30, 31, 30], Cc = [10, 16, 24, 33, 41, 49];
     s.addChart(pres.charts.BAR, [{ name: '買物の支援', labels, values: A }, { name: '外出の付添い', labels, values: B }, { name: '通院の送迎', labels, values: Cc }],
-      Object.assign({}, chartBase, { x: L, y: 2.15, w: 8.0, h: 4.5, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 60, chartColors: [G2, G3, NAVY], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+      Object.assign({}, chartBase, { x: L, y: 2.15, w: 8.0, h: 4.5, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G2, G3, NAVY], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
     txt(s, '通院の送迎', { x: L + 8.15, y: 2.75, w: 1.9, h: 0.3, bold: true, color: NAVY });
     txt(s, '外出の付添い', { x: L + 8.15, y: 4.05, w: 1.9, h: 0.3 });
     txt(s, '買物の支援', { x: L + 8.15, y: 5.25, w: 1.9, h: 0.3 });
@@ -363,7 +363,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     const labels = ['全体', '〜50代', '60代', '70代', '80代以上'].reverse();
     const v = [62, 70, 64, 55, 31].reverse();
     s.addChart(pres.charts.BAR, [{ name: 'その他', labels, values: v.map((x, i) => i === 0 ? 0 : x) }, { name: '注目', labels, values: v.map((x, i) => i === 0 ? x : 0) }],
-      Object.assign({}, chartBase, { x: L, y: 2.1, w: 6.2, h: 4.5, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 50, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;', valAxisMinVal: 0, valAxisMaxVal: 100 }));
+      Object.assign({}, chartBase, { x: L, y: 2.1, w: 6.2, h: 4.5, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;', valAxisMinVal: 0, valAxisMaxVal: 100 }));
     const bx = L + 6.5, bw = R - bx;
     s.addShape(pres.shapes.RECTANGLE, { x: bx, y: 2.1, w: bw, h: 4.5, fill: { color: G5 }, line: { type: 'none' } });
     const blocks = [['80代以上の満足は31%で、全体の半分にとどまる', '不満の理由の6割が「停留所が遠い・坂道がある」（自由回答）'],

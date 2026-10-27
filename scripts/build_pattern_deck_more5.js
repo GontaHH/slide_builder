@@ -4,7 +4,7 @@
 // 見本の値はすべて架空（みなと市のバス事業）。
 module.exports = function ({ pres, frame, txt, line, head, rowRule, icon, C }) {
   const { NAVY, BLACK, G1, G2, G3, WHITE, L, R, W, BODY_Y } = C;
-  const num = (o) => Object.assign({ fontFace: 'Arial' }, o);
+  const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
   const bar = (s, x, y, w, h, color) => s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color }, line: { type: 'none' } });
 
   // ---------- P79 行そろえの小図＋読み取り列 ----------
