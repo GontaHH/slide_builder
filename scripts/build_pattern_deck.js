@@ -98,7 +98,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   const s = pres.addSlide();
   pageNo++;
   txt(s, 'パターン見本デッキ', { x: 0.8, y: 2.4, w: 9, h: 0.8, fontSize: 32, bold: true, color: NAVY });
-  txt(s, 'consulting-slide-builder 用　78の型（P01〜P78）＋記号集・アイコン集・テンプレート集＋通しの完成例', { x: 0.8, y: 3.25, w: 9.2, h: 0.55, fontSize: 16, color: BLACK });
+  txt(s, 'consulting-slide-builder 用　80の型（P01〜P80）＋記号集・アイコン集・テンプレート集＋通しの完成例', { x: 0.8, y: 3.25, w: 9.2, h: 0.55, fontSize: 16, color: BLACK });
   txt(s, '使い方：伝えたいことを先に決め、合う型を選んで中身を差し替える。各スライドのノートに、パターンID・使う場面・差し替える箇所を記載。\n名称・数値はすべて架空の見本（架空の「みなと市」のバス事業など）。成果物に残さないこと。', { x: 0.8, y: 4.1, w: 9.2, h: 0.9, fontSize: 14, color: G1 });
   line(s, 0.8, 3.85, 9.2, 0, G3, 0.75);
   s.addNotes('表紙。案件で使う際は、このファイルを案件名で別名保存し、最後に見本スライドを削除する。');
@@ -187,9 +187,9 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
 // ---------- P06 ウォーターフォール（図形で作図） ----------
 {
   const s = frame('P06', '2　課題', '年間利用者数は10年で412万人から290万人に減り、減少の約8割は人口減少による。人口が減り続ける以上、路線網の維持だけを目標にはできない', '年間利用者数の増減要因', '（万人、2015→2025年度）',
-    '使う場面：増減の要因分解。始点・終点はGray2、要因はGray1、最大要因だけ紺。増減は「＋」「−」で示し、赤緑で塗り分けない。棒は図形で作図（編集可能）。\n差し替え：要因名・値。棒の高さは値に比例させて調整する。');
+    '使う場面：増減の要因分解。始点・終点はGray2、要因はGray1、最大要因だけ紺。増減は「＋」「−」で示し、赤緑で塗り分けない。棒は図形で作図（編集可能）。要因の下に「全体の増減に占める割合」を丸の印で並べると、どの要因が効いているかが数字で読める（MCK04-p13）。割合の合計は100%になるよう検算する。\n差し替え：要因名・値・割合。棒の高さは値に比例させて調整する。');
   const items = [['2015年度', 412, 'total'], ['人口減少', -96, 'key'], ['通学の\n減少', -31, 'n'], ['通院の\n増加', 18, 'n'], ['その他', -13, 'n'], ['2025年度', 290, 'total']];
-  const x0 = L + 0.3, bw = 1.05, gap = 0.55, base = 5.95, scale = 0.0085;
+  const x0 = L + 0.3, bw = 1.05, gap = 0.55, base = 5.45, scale = 0.0075, net = items[items.length - 1][1] - items[0][1];
   let level = 0;
   items.forEach((it, i) => {
     const [name, v, kind] = it;
@@ -203,7 +203,13 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     txt(s, lbl, num({ x, y: top - 0.32, w: bw, h: 0.28, fontSize: 14, bold: kind === 'key', color: kind === 'key' ? NAVY : BLACK, align: 'center' }));
     txt(s, name, { x: x - 0.1, y: base + 0.08, w: bw + 0.2, h: 0.6, fontSize: 14, align: 'center' });
     if (i < items.length - 1) line(s, x + bw, base - level * scale, gap, 0, G3, 0.5, { line: { color: G3, width: 0.5, dashType: 'dash' } });
+    if (kind !== 'total') {
+      const share = Math.round(100 * v / net), bx = x + bw / 2 - 0.4, by = base + 0.75;
+      s.addShape(pres.shapes.OVAL, { x: bx, y: by, w: 0.8, h: 0.34, fill: { color: kind === 'key' ? NAVY : G2 }, line: { type: 'none' } });
+      txt(s, (share < 0 ? '−' : '') + Math.abs(share) + '%', num({ x: bx, y: by, w: 0.8, h: 0.34, fontSize: 14, bold: true, color: WHITE, align: 'center', valign: 'middle' }));
+    }
   });
+  txt(s, '減少に占める割合', { x: x0 - 0.1, y: base + 0.75, w: 1.6, h: 0.34, fontSize: 14, bold: true, valign: 'middle' });
   line(s, L, base, W, 0, G3, 0.75);
 }
 
@@ -490,6 +496,7 @@ require('./build_pattern_deck_more.js')(CTX);
 require('./build_pattern_deck_more2.js')(CTX);
 require('./build_pattern_deck_more3.js')(CTX);
 require('./build_pattern_deck_more4.js')(CTX);
+require('./build_pattern_deck_more5.js')(CTX);
 require('./build_symbol_icon_sheets.js')(CTX);
 require('./build_template_sheets.js')(CTX);
 require('./build_example_deck.js')(CTX);

@@ -359,18 +359,21 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
   // ---------- P54 図＋右側の示唆帯 ----------
   {
     const s = frame('P54', '1　現状', 'バスの満足度は年代が上がるほど低く、80代以上は全体の半分にとどまる。背景には停留所の遠さがあり、支援は80代以上から始めるべきである', '年代別のバスの満足度', '（「満足」「やや満足」の計、%、n＝1,200、2026年5月）',
-      '使う場面：左に定量の図、右端の淡いグレーの縦帯に「現場の声」や「示唆」を集約する。公開資料（MCK02-p9、MCK02-p58、MCK03-p21）に多い構成。帯の中の結論の一文だけ紺。\n差し替え：図のデータ、帯の声・示唆。');
+      '使う場面：左に定量の図、右端の淡い縦帯に読み取りと示唆を集約する。公開資料（MCK02-p9、MCK04-p9・p17・p27）に多い構成。帯は2〜3つの段に分け、各段を「太字の一文（言いたいこと）＋本文2〜3行（根拠・例）」で書く。段の間は細い線で区切る。帯の中で紺にするのは結論の段の太字だけ。\n差し替え：図のデータ、帯の各段。');
     const labels = ['全体', '〜50代', '60代', '70代', '80代以上'].reverse();
     const v = [62, 70, 64, 55, 31].reverse();
     s.addChart(pres.charts.BAR, [{ name: 'その他', labels, values: v.map((x, i) => i === 0 ? 0 : x) }, { name: '注目', labels, values: v.map((x, i) => i === 0 ? x : 0) }],
       Object.assign({}, chartBase, { x: L, y: 2.1, w: 6.2, h: 4.5, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 50, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;', valAxisMinVal: 0, valAxisMaxVal: 100 }));
     const bx = L + 6.5, bw = R - bx;
     s.addShape(pres.shapes.RECTANGLE, { x: bx, y: 2.1, w: bw, h: 4.5, fill: { color: G5 }, line: { type: 'none' } });
-    txt(s, '現場の声', { x: bx + 0.2, y: 2.25, w: bw - 0.4, h: 0.3, bold: true, color: G1 });
-    txt(s, [{ text: '「停留所まで坂道を15分歩く」', options: { breakLine: true } }, { text: '「病院の前に止まってほしい」' }], { x: bx + 0.2, y: 2.65, w: bw - 0.4, h: 1.5 });
-    line(s, bx + 0.2, 4.35, bw - 0.4, 0, G3, 0.75);
-    txt(s, '示唆', { x: bx + 0.2, y: 4.5, w: bw - 0.4, h: 0.3, bold: true, color: G1 });
-    txt(s, '80代以上の多い地区から予約型を始め、乗降地点を病院の前に置く', { x: bx + 0.2, y: 4.9, w: bw - 0.4, h: 1.2, bold: true, color: NAVY });
+    const blocks = [['80代以上の満足は31%で、全体の半分にとどまる', '不満の理由の6割が「停留所が遠い・坂道がある」（自由回答）'],
+      ['80代以上の多い地区から予約型を始めるべきである', '乗降地点を病院と自宅の前に置き、停留所まで歩く負担をなくす', true]];
+    blocks.forEach(([lead, body, key], i) => {
+      const y = 2.3 + i * 2.15;
+      if (i) line(s, bx + 0.2, y - 0.2, bw - 0.4, 0, G3, 0.75);
+      txt(s, lead, { x: bx + 0.2, y, w: bw - 0.4, h: 0.7, bold: true, color: key ? NAVY : BLACK });
+      txt(s, body, { x: bx + 0.2, y: y + 0.75, w: bw - 0.4, h: 0.9 });
+    });
   }
 
   // ---------- P55 表内ミニバー ----------
