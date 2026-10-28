@@ -2,7 +2,7 @@
 // Jinba consulting-pptx-skill の型カタログ（62型）と外資系コンサルの公開資料の作法を参考に、
 // 既存20型で不足していた「構造で通す」「進め方・計画」「提示・締め」「数字で証明（シナリオ・感度）」を補う。
 // 2026-10-22：見本の値を架空の値（みなと市のバス事業）にし、箱で囲んだ器を「見出し＋線」に改めた（P22・P23・P32）。
-module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C }) {
+module.exports = function ({ pres, frame, txt, line, rect, readout, PANEL_W, head, rowRule, bullets, chartBase, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
@@ -182,19 +182,21 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     const s = frame('P28', '3　打ち手', '収支を最も左右する前提は利用者数で、±10%の変動で収支が年4,000万円前後動く。本格投資の前に、利用者数を試行で確かめるべきである', '前提が±10%変動したときの収支の変化', '（百万円／年、基本ケース＝−210）',
       '使う場面：どの前提が結論を左右するかを示す。影響の大きい順に上から並べる。最も影響の大きい前提だけ紺。基本ケースの値を中央線で示す。\n差し替え：前提名、下振れ・上振れの値。');
     const items = [['利用者数', 42, 38, true], ['運賃単価', 25, 25, false], ['運転士の人件費', 18, 15, false], ['燃料費', 10, 9, false], ['その他', 5, 4, false]];
-    const cx = L + 2.9 + (W - 2.9) / 2, sc = 0.07, top = 2.25;
+    const cx = L + 2.4 + (W - 2.4 - PANEL_W - 0.3) / 2, sc = 0.048, top = 2.25;
     txt(s, '下振れ', { x: cx - 2.4, y: 2.05, w: 2.2, h: 0.28, align: 'right', color: G1 });
     txt(s, '上振れ', { x: cx + 0.2, y: 2.05, w: 2.2, h: 0.28, color: G1 });
     items.forEach(([n, lo, hi, key], i) => {
       const y = top + 0.25 + i * 0.82;
-      txt(s, n, { x: L, y, w: 2.8, h: 0.5, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
+      txt(s, n, { x: L, y, w: 2.3, h: 0.5, valign: 'middle', bold: key, color: key ? NAVY : BLACK, fontSize: 12 });
       s.addShape(pres.shapes.RECTANGLE, { x: cx - lo * sc, y: y + 0.07, w: lo * sc, h: 0.36, fill: { color: key ? NAVY : G3 }, line: { type: 'none' } });
       s.addShape(pres.shapes.RECTANGLE, { x: cx, y: y + 0.07, w: hi * sc, h: 0.36, fill: { color: key ? NAVY : G3 }, line: { type: 'none' } });
       txt(s, '−' + lo, num({ x: cx - lo * sc - 0.75, y, w: 0.7, h: 0.5, align: 'right', valign: 'middle', bold: key, color: key ? NAVY : BLACK }));
       txt(s, '＋' + hi, num({ x: cx + hi * sc + 0.05, y, w: 0.7, h: 0.5, valign: 'middle', bold: key, color: key ? NAVY : BLACK }));
     });
     line(s, cx, top + 0.1, 0, 4.25, G2, 1);
-    txt(s, '基本ケース', { x: cx - 0.8, y: top + 4.4, w: 1.6, h: 0.3, align: 'center', color: G1 });
+    txt(s, '基本ケース', { x: cx - 0.8, y: top + 4.4, w: 1.6, h: 0.3, align: 'center', color: G1, fontSize: 12 });
+    readout(s, [['利用者数の±10%で収支が約4,000万円動く', '下振れ−42・上振れ＋38百万円で、2位の運賃単価（±25）の1.6倍に当たる'],
+      ['試行で利用者数を確かめてから投資する', '2地区の試行（2027年）で継続利用率80%以上を確かめ、本格投資の判断の基準にする（P47）']]);
   }
 
   // ---------- P29 計算ロジック（ドライバーの式） ----------
@@ -291,12 +293,14 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
       '使う場面：同じ図法・同じ目盛りで、切り口違い（地域・事業・顧客層）を並べて比べる。目盛りは必ずそろえる。注目の1枚だけ紺、他はグレー。\n差し替え：各小図のデータと見出し。');
     const labels = ['15', '17', '19', '21', '23', '25'];
     const sets = [['北部', [60, 62, 61, 63, 64, 66], false], ['西部', [55, 54, 56, 55, 57, 58], false], ['東部', [70, 64, 58, 52, 47, 41], true], ['中央部', [40, 41, 43, 46, 49, 52], false]];
-    const cw = (W - 0.6) / 4;
+    const cw = (W - PANEL_W - 0.3 - 0.45) / 4;
     sets.forEach(([n, v, key], i) => {
-      const x = L + i * (cw + 0.2);
+      const x = L + i * (cw + 0.15);
       head(s, x, 2.1, cw, n, { key, align: 'center' });
-      s.addChart(pres.charts.BAR, [{ name: n, labels, values: v }], Object.assign({}, chartBase, { x, y: 2.6, w: cw, h: 3.55, barDir: 'col', barGapWidthPct: 40, chartColors: [key ? NAVY : G3], showValue: false, valAxisMinVal: 0, valAxisMaxVal: 80, catAxisLabelFontSize: 14 }));
+      s.addChart(pres.charts.BAR, [{ name: n, labels, values: v }], Object.assign({}, chartBase, { x, y: 2.6, w: cw, h: 3.55, barDir: 'col', barGapWidthPct: 40, chartColors: [key ? NAVY : G3], showValue: false, valAxisMinVal: 0, valAxisMaxVal: 80, catAxisLabelFontSize: 12 }));
       txt(s, '10年で ' + (v[5] - v[0] >= 0 ? '＋' : '−') + Math.abs(v[5] - v[0]), num({ x, y: 6.2, w: cw, h: 0.35, align: 'center', bold: true, color: key ? NAVY : G1 }));
     });
+    readout(s, [['減り続けているのは東部だけ', '東部は10年で70万人から41万人に減った（−41%）。他の3地区は横ばいか増加'],
+      ['東部では通学の利用が半分になった', '沿線の高校の統合（2016年）以降、東部の通学の利用は10年で半分に減った']]);
   }
 };

@@ -467,9 +467,11 @@ function readout(s, blocks, o = {}) {
     { name: 'ややそう思う', labels, values: [20, 22, 25, 22, 22].reverse() },
     { name: 'どちらでもない', labels, values: [15, 20, 17, 16, 13].reverse() },
     { name: 'そう思わない', labels, values: [13, 18, 14, 12, 10].reverse() },
-  ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W - PANEL_W - 0.25, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
   const lg = [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']];
-  lg.forEach(([n, c], i) => { const x = L + 1.6 + i * 2.1; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.12, w: 1.7, h: 0.3, fontSize: 14, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
+  lg.forEach(([n, c], i) => { const x = L + 0.75 + i * 1.5; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.18, h: 0.18, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.24, y: 2.11, w: 1.35, h: 0.3, fontSize: 12, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
+  readout(s, [['70代以上の77%が存続を望む', '「そう思う」と「ややそう思う」の計。若い世代ほど低く、10〜20代は62%にとどまる'],
+    ['反対は全体の13%にとどまる', '存続の是非ではなく、どの形で維持するかが議論の中心になる']]);
 }
 
 // ---------- P19 提言 ----------
@@ -517,7 +519,7 @@ function readout(s, blocks, o = {}) {
   });
 }
 
-const CTX = { pres, frame, txt, line, rect, head, rowRule, bullets, RULE, chartBase, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y, TOP } };
+const CTX = { pres, frame, txt, line, rect, head, rowRule, bullets, RULE, chartBase, readout, PANEL_W, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y, TOP } };
 require('./build_pattern_deck_more.js')(CTX);
 require('./build_pattern_deck_more2.js')(CTX);
 require('./build_pattern_deck_more3.js')(CTX);

@@ -1,7 +1,7 @@
 // 追加の型 P34〜P55（2026-10 追加・第2弾）
 // 外資系コンサルの公開資料（経産省委託調査報告書など）に多い見せ方と、Jinba 型カタログの残りの型を、本スキルの規定で作り直したもの。
 // 2026-10-22：見本の値を架空の値（みなと市のバス事業）にし、箱で囲んだ器を「見出し＋線」に改めた（P44・P48）。下半分が空いた型（P38・P39・P49）に中身を足した。
-module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C }) {
+module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, readout, PANEL_W, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
   const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
@@ -142,11 +142,13 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     const labels = ['2015', '2017', '2019', '2021', '2023', '2025'];
     const A = [40, 41, 40, 41, 40, 41], B = [30, 30, 31, 30, 31, 30], Cc = [10, 16, 24, 33, 41, 49];
     s.addChart(pres.charts.BAR, [{ name: '買物の支援', labels, values: A }, { name: '外出の付添い', labels, values: B }, { name: '通院の送迎', labels, values: Cc }],
-      Object.assign({}, chartBase, { x: L, y: 2.15, w: 8.0, h: 4.5, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G2, G3, NAVY], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
-    txt(s, '通院の送迎', { x: L + 8.15, y: 2.75, w: 1.9, h: 0.3, bold: true, color: NAVY });
-    txt(s, '外出の付添い', { x: L + 8.15, y: 4.05, w: 1.9, h: 0.3 });
-    txt(s, '買物の支援', { x: L + 8.15, y: 5.25, w: 1.9, h: 0.3 });
-    txt(s, '合計 80 → 120', num({ x: L + 8.15, y: 2.2, w: 2.1, h: 0.3, fontSize: 14, color: G1 }));
+      Object.assign({}, chartBase, { x: L, y: 2.45, w: 5.4, h: 4.2, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G2, G3, NAVY], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+    txt(s, '通院の送迎', { x: L + 5.5, y: 3.05, w: 1.3, h: 0.3, bold: true, color: NAVY, fontSize: 12 });
+    txt(s, '外出の付添い', { x: L + 5.5, y: 4.25, w: 1.3, h: 0.3, fontSize: 12 });
+    txt(s, '買物の支援', { x: L + 5.5, y: 5.35, w: 1.3, h: 0.3, fontSize: 12 });
+    txt(s, '合計 80 → 120', num({ x: L, y: 2.1, w: 5.4, h: 0.3, align: 'center', color: G1 }));
+    readout(s, [['10年で4億円増え、12億円になった', '増加の40千万円のうち39千万円が通院の送迎による。買物の支援と外出の付添いは横ばい'],
+      ['通院の送迎は5倍になった', '10千万円から49千万円へ。予約型交通に置き換えると、送迎の費用の半分を減らせる見込み（試算）']]);
   }
 
   // ---------- P42 柱＋土台（戦略の構造） ----------
