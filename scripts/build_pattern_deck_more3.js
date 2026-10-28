@@ -2,7 +2,7 @@
 // 公開資料の新型候補（MCK01・BCG01）と、外資系コンサルの資料に多い図法（ダンベル、スロープ、ブレット、パレート、ファネル、分布、
 // カスタマージャーニー、体制図、ワークストリーム計画、年表、選択肢カード、関係者マップ）を、本スキルの規定で作り直したもの。
 // 見本の値は【】の空欄ではなく、それらしいダミー値にして、完成形の見た目を確かめられるようにしている。
-module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
+module.exports = function ({ pres, frame, txt, line, rect, icon, readout, PANEL_W, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BLUE5 } = C;
   const TINT = { color: BLUE5 };
   const shape = (s, type, x, y, w, h, o) => s.addShape(pres.shapes[type], Object.assign({ x, y, w, h }, o));
@@ -111,23 +111,26 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
   {
     const s = frame('P60', '1　現状', '8地域すべてで利用率は10年で下がったが、下げ幅は地域で大きく異なる。対象の東部は21ポイント減と最も大きく、平均の2倍に当たる', '地域別の公共交通の利用率', '（%、2015年度と2025年度）',
       '使う場面：2時点（または2群）の差を、行ごとに点と線で示す。差の大きい順に並べ、変化の向きが一目で分かる。両端の値を点の外側に書く。注目する行だけ紺、他はグレー（前の時点は淡く、後の時点は濃く）。');
+    const R = C.R - PANEL_W - 0.25, W = R - L;   // 右に読み取り帯
     const rows = [['東部', 48, 27], ['北部', 41, 29], ['山間部', 35, 24], ['西部', 44, 34], ['湾岸部', 39, 30], ['中央部', 52, 45], ['南部', 33, 27], ['市街地', 58, 54]];
-    const top = 2.35, rh = 0.5, x0 = L + 2.0, sc = 0.105, base = 15;
+    const top = 2.35, rh = 0.5, x0 = L + 1.5, sc = 0.09, base = 15;
     const X = v => x0 + (v - base) * sc;
     dot(s, X(48) - 0.28, 2.23, 0.16, G3); txt(s, '2015年度', { x: X(48) - 0.15, y: 2.08, w: 1.4, h: 0.3 });
     dot(s, X(27) - 1.08, 2.23, 0.16, G2); txt(s, '2025年度', { x: X(27) - 0.95, y: 2.08, w: 1.4, h: 0.3 });
-    txt(s, '差', { x: R - 1.0, y: 2.08, w: 1.0, h: 0.3, color: G1, bold: true, align: 'right' });
+    txt(s, '差', { x: R - 0.6, y: 2.08, w: 0.6, h: 0.3, color: G1, bold: true, align: 'right' });
     rows.forEach(([n, a, b], i) => {
       const y = top + 0.15 + i * rh, cy = y + rh / 2, key = i === 0;
-      txt(s, n, { x: L, y, w: 1.8, h: rh, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
+      txt(s, n, { x: L, y, w: 1.4, h: rh, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
       line(s, X(b), cy, X(a) - X(b), 0, key ? NAVY : G3, key ? 2.5 : 2);
       dot(s, X(a), cy, 0.2, key ? WHITE : G3, key ? NAVY : null);
       dot(s, X(b), cy, 0.2, key ? NAVY : G2);
       txt(s, String(a), num({ x: X(a) + 0.15, y, w: 0.5, h: rh, valign: 'middle', color: key ? NAVY : G1 }));
       txt(s, String(b), num({ x: X(b) - 0.65, y, w: 0.5, h: rh, valign: 'middle', align: 'right', color: key ? NAVY : BLACK, bold: key }));
-      txt(s, '−' + (a - b), num({ x: R - 1.0, y, w: 1.0, h: rh, valign: 'middle', align: 'right', bold: key, color: key ? NAVY : BLACK }));
+      txt(s, '−' + (a - b), num({ x: R - 0.6, y, w: 0.6, h: rh, valign: 'middle', align: 'right', bold: key, color: key ? NAVY : BLACK }));
       line(s, L, y + rh, W, 0, G5, 0.5);
     });
+    readout(s, [['東部の下げ幅は21pt、8地域で最大', '8地域の平均の下げ幅は10pt。東部はその2倍で、2位の北部（−12pt）も大きく上回る'],
+      ['利用率の高い市街地ほど減りにくい', '市街地は58%から54%（−4pt）。運行本数の多い地区ほど利用が保たれている']]);
   }
 
   // ---------- P61 スロープグラフ ----------
@@ -178,16 +181,17 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
       '使う場面：多数の要因のうち少数が大半を占めることを示す。件数の降順に棒を並べ、累積構成比を折れ線で重ね、80%などの目安に点線を引く。対策を絞る上位の棒だけ紺。');
     const data = [['遅延', 182], ['接続', 121], ['情報提供', 97], ['運賃', 41], ['車内', 33], ['乗務員', 27], ['設備', 22], ['予約', 18], ['その他', 22]];
     const total = data.reduce((a, d) => a + d[1], 0);
-    const x0 = L + 0.6, cw = 0.95, bw = 0.62, y0 = 6.15, hs = 0.017, ph = 3.7, top = y0 - ph;
+    const R = C.R - PANEL_W - 0.25;   // 右に読み取り帯
+    const x0 = L + 0.4, cw = 0.68, bw = 0.46, y0 = 6.15, hs = 0.017, ph = 3.7, top = y0 - ph;
     line(s, x0 - 0.1, y0, data.length * cw + 0.1, 0, G3, 0.75);
     shape(s, 'LINE', x0 - 0.1, top + ph * 0.2, data.length * cw + 0.1, 0, { line: { color: G1, width: 0.75, dashType: 'dash' } });
-    txt(s, '80%', num({ x: x0 + data.length * cw + 0.05, y: top + ph * 0.2 - 0.16, w: 0.7, h: 0.32, color: G1 }));
+    txt(s, '80%', num({ x: x0 + data.length * cw - 0.6, y: top + ph * 0.2 - 0.34, w: 0.6, h: 0.3, color: G1, align: 'right' }));
     let cum = 0, prev = null;
     data.forEach(([n, v], i) => {
       const x = x0 + i * cw, key = i < 3;
       fillRect(s, x, y0 - v * hs, bw, v * hs, key ? NAVY : G3);
       txt(s, String(v), num({ x: x - 0.1, y: y0 - v * hs - 0.32, w: bw + 0.2, h: 0.3, align: 'center', color: key ? NAVY : BLACK, bold: key }));
-      txt(s, n, { x: x - 0.17, y: y0 + 0.05, w: bw + 0.34, h: 0.3, align: 'center' });
+      txt(s, n, { x: x - 0.17, y: y0 + 0.05, w: bw + 0.34, h: 0.3, align: 'center', fontSize: 12 });
       cum += v;
       const cx = x + bw / 2, cy = y0 - ph * cum / total;
       if (prev) shape(s, 'LINE', prev[0], Math.min(prev[1], cy), cx - prev[0], Math.abs(prev[1] - cy) || 0.001, { line: { color: G1, width: 1.25 }, flipV: true });
@@ -195,7 +199,9 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
       if (i === 2) txt(s, Math.round(100 * cum / total) + '%', num({ x: cx + 0.12, y: cy - 0.05, w: 0.8, h: 0.3, bold: true, color: NAVY }));
       prev = [cx, cy];
     });
-    txt(s, '累積構成比', { x: R - 1.6, y: top - 0.15, w: 1.6, h: 0.3, color: G1, align: 'right' });
+    txt(s, '累積構成比', { x: R - 1.6, y: top - 0.5, w: 1.6, h: 0.3, color: G1, align: 'right', fontSize: 12 });
+    readout(s, [['上位3種類で苦情の71%を占める', '遅延182件・接続121件・情報提供97件。いずれも運行の遅れと案内の不足から生じている'],
+      ['3つに対策を絞れば苦情の大半が減る', '遅延と接続は接続ダイヤの見直し（P78）、情報提供は車内と停留所の表示で手当てできる']]);
   }
 
   // ---------- P64 ファネル（段階の歩留まり） ----------
@@ -203,16 +209,19 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     const s = frame('P64', '2　課題', 'アプリを知った人のうち実際に予約まで至るのは12%にとどまる。最大の離脱は登録から初回予約の間で起きており、ここで半数以上が離れている', '利用までの段階ごとの人数と移行率', '（人、2026年4〜9月）',
       '使う場面：段階ごとに人数が減る過程を示し、どこで最も離れるかを特定する。棒は中央にそろえて段階順に積み、段階の間に移行率を書く。最も移行率の低い段階だけ紺。');
     const st = [['アプリを知った', 20000], ['ダウンロード', 9200], ['会員登録', 5600], ['初回予約', 2400], ['2回目以降の予約', 1500]];
-    const mw = 5.0, cx = L + 2.4 + mw / 2, top = 2.15, rh = 0.84;
-    colHead(s, R - 2.3, top - 0.1, 2.3, '前段階からの移行率', { align: 'right' });
+    const R = C.R - PANEL_W - 0.25;   // 右に読み取り帯
+    const mw = 3.4, cx = L + 2.0 + mw / 2, top = 2.15, rh = 0.84;
+    colHead(s, R - 1.3, top - 0.1, 1.3, '移行率', { align: 'right' });
     st.forEach(([n, v], i) => {
       const y = top + 0.25 + i * rh, w = mw * v / st[0][1], key = i === 3;
       fillRect(s, cx - w / 2, y, w, rh - 0.22, key ? NAVY : G3);
-      txt(s, n, { x: L, y, w: 2.2, h: rh - 0.22, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
+      txt(s, n, { x: L, y, w: 1.95, h: rh - 0.22, valign: 'middle', bold: key, color: key ? NAVY : BLACK, fontSize: 12 });
       txt(s, v.toLocaleString('en-US'), num({ x: cx + Math.max(w, 1.4) / 2 + 0.1, y, w: 1.0, h: rh - 0.22, valign: 'middle', color: key ? NAVY : BLACK, bold: key }));
       if (i > 0) txt(s, Math.round(100 * v / st[i - 1][1]) + '%', num({ x: R - 1.2, y: y - 0.1, w: 1.2, h: rh - 0.02, valign: 'middle', align: 'right', fontSize: key ? 20 : 14, bold: true, color: key ? NAVY : BLACK }));
-      if (i > 0) line(s, R - 2.3, y - 0.11, 2.3, 0, G4, 0.5);
+      if (i > 0) line(s, R - 1.3, y - 0.11, 1.3, 0, G4, 0.5);
     });
+    readout(s, [['アプリを知った人の12%が予約まで至る', '20,000人のうち初回予約は2,400人。2回目以降も使い続けるのは1,500人（7.5%）'],
+      ['最大の離脱は登録から初回予約の間', '移行率は43%で5段階の中で最も低い。初回の予約の手順を3つに減らす（P51）']]);
   }
 
   // ---------- P65 分布（ヒストグラム＋中央値） ----------
@@ -220,7 +229,7 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     const s = frame('P65', '1　現状', '沿線42集落の最寄り駅までの距離は中央値で2.4kmだが、5km以上の集落が9つあり分布は長く右に伸びる。平均値では遠い集落の実態が見えない', '集落別の最寄り駅までの距離の分布', '（集落数、km）',
       '使う場面：平均だけでは伝わらない、ばらつきや偏りを示す。階級ごとの件数を隙間の狭い縦棒で並べ、中央値（または平均）を縦の点線で示す。注目する階級だけ紺。');
     const bins = [['0–1', 6], ['1–2', 10], ['2–3', 9], ['3–4', 5], ['4–5', 3], ['5–6', 3], ['6–7', 2], ['7–8', 2], ['8–', 2]];
-    const x0 = L + 0.8, cw = 0.95, y0 = 6.1, hs = 0.34;
+    const x0 = L + 0.5, cw = 0.66, y0 = 6.1, hs = 0.34;
     line(s, x0 - 0.1, y0, bins.length * cw + 0.1, 0, G3, 0.75);
     bins.forEach(([n, v], i) => {
       const x = x0 + i * cw, key = i >= 5;
@@ -232,7 +241,9 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, C }) {
     shape(s, 'LINE', mx, 2.3, 0, y0 - 2.3, { line: { color: BLACK, width: 1, dashType: 'dash' } });
     txt(s, '中央値 2.4km', { x: mx + 0.08, y: 2.2, w: 1.8, h: 0.3, bold: true });
     line(s, x0 + 5 * cw, y0 - 3 * hs - 0.5, 4 * cw - 0.06, 0, NAVY, 1);
-    txt(s, '5km以上　9集落', { x: x0 + 5 * cw, y: y0 - 3 * hs - 0.88, w: 4 * cw, h: 0.3, align: 'center', bold: true, color: NAVY });
+    txt(s, '5km以上　9集落', { x: x0 + 5 * cw - 0.2, y: y0 - 3 * hs - 0.88, w: 4 * cw + 0.4, h: 0.3, align: 'center', bold: true, color: NAVY });
+    readout(s, [['中央値は2.4km、9集落は5km以上', '42集落の2割が駅から5km以上離れ、歩いて駅に行けない'],
+      ['平均の3.2kmでは遠い集落が見えない', '遠い9集落の住民は約1,400人。予約型交通の乗降地点を、まずここに置く']]);
   }
 
   // ---------- P66 カスタマージャーニー ----------
