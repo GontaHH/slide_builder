@@ -4,6 +4,7 @@ const pptxgen = require('pptxgenjs');
 const path = require('path');
 const OUT = process.argv[2] || 'pattern-deck.pptx';
 const { iconQueue } = require('./icons.js');
+const NOTES = require('./sample_notes.js');
 
 const pres = new pptxgen();
 pres.defineLayout({ name: 'A4_NRI', width: 10.833, height: 7.5 });
@@ -78,7 +79,9 @@ function frame(id, chapter, message, slideTitle, unit, notes, opts = {}) {
   // 見本ステッカー（右上。本番では「試算」「暫定」等に差し替えるか削除）
   txt(s, opts.sticker || '見本', { x: R - (opts.sticker ? 1.05 : 0.75), y: BODY_Y + 0.02, w: opts.sticker ? 1.05 : 0.75, h: 0.26, fontSize: 11, color: G1, align: 'center', valign: 'middle', line: { color: G3, width: 0.75 } });
   // 注記・出所・ページ番号
-  txt(s, opts.source || '注）名称・数値はすべて架空の見本。実際の資料ではエビデンスExcelの値に差し替える\n出所）みなと市「バス路線別輸送実績」（2026年3月）を基に作成（架空の出所）', { x: L, y: 6.86, w: 8.6, h: 0.42, fontSize: 9, color: G1 });
+  // 注記・出所：型ごとに要るものだけ（scripts/sample_notes.js）。無い型は既定の一文
+  const note = opts.source !== undefined ? opts.source : (NOTES[id] !== undefined ? NOTES[id] : '注）名称・数値はすべて架空の見本。実際の資料ではエビデンスExcelの値に差し替える\n出所）みなと市「バス路線別輸送実績」（2026年3月）を基に作成（架空の出所）');
+  if (note) txt(s, note, { x: L, y: 6.86, w: 8.6, h: 0.42, fontSize: 9, color: G1 });
   txt(s, String(pageNo), { x: R - 0.5, y: 7.08, w: 0.5, h: 0.2, fontSize: 9, color: G1, align: 'right' });
   s.addNotes(opts.rawNotes ? notes : `パターンID：${id}\n${notes}\n参考ページID：${(REFS[id] || []).join('、') || '未登録（slide-reference-library で収集後に追記）'}（画像はPCの参照ライブラリ/pages/）`);
   return s;
