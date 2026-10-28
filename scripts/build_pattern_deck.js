@@ -86,7 +86,7 @@ function frame(id, chapter, message, slideTitle, unit, notes, opts = {}) {
   if (note) txt(s, note, { x: L, y: 6.86, w: 8.6, h: 0.42, fontSize: 9, color: G1 });
   txt(s, String(pageNo), { x: R - 0.5, y: 7.08, w: 0.5, h: 0.2, fontSize: 9, color: G1, align: 'right' });
   s.addNotes(opts.rawNotes ? notes : `パターンID：${id}\n${notes}\n参考ページID：${(REFS[id] || []).join('、') || '未登録（slide-reference-library で収集後に追記）'}（画像はPCの参照ライブラリ/pages/）`);
-  s.__id = id; s.__cs = s._slideObjects.length; FRAMED.push(s);   // 本体の要素はここから後（withReadout で使う）
+  s.__id = id; s.__msg = message; s.__cs = s._slideObjects.length; FRAMED.push(s);   // 本体の要素はここから後（withReadout で使う）
   return s;
 }
 
@@ -566,7 +566,10 @@ function withReadout(s, blocks) {
   });
   readout(s, blocks);
 }
-FRAMED.forEach(s => { if (READOUTS[s.__id] && s.__id !== 'EX') withReadout(s, READOUTS[s.__id]); });
+FRAMED.forEach(s => {
+  if (s.__id === 'EX') { const hit = READOUTS.EX.find(([k]) => (s.__msg || '').startsWith(k)); if (hit) withReadout(s, hit[1]); }
+  else if (READOUTS[s.__id]) withReadout(s, READOUTS[s.__id]);
+});
 
 ICON.flush()
   .then(() => pres.write({ outputType: 'nodebuffer' }))

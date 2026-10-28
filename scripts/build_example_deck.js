@@ -230,8 +230,8 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
       txt(s, n, { x: L, y, w: 2.4, h: 0.5, valign: 'middle', bold: key, color: key ? NAVY : BLACK });
       s.addShape(pres.shapes.RECTANGLE, { x: cx - v * sc, y: y + 0.07, w: v * sc, h: 0.36, fill: { color: key ? NAVY : G3 }, line: { type: 'none' } });
       s.addShape(pres.shapes.RECTANGLE, { x: cx, y: y + 0.07, w: v * sc, h: 0.36, fill: { color: key ? NAVY : G3 }, line: { type: 'none' } });
-      txt(s, '−' + v.toFixed(2), { x: cx - v * sc - 0.8, y, w: 0.75, h: 0.5, align: 'right', valign: 'middle', fontFace: 'Arial', bold: key, color: key ? NAVY : BLACK });
-      txt(s, '＋' + v.toFixed(2), { x: cx + v * sc + 0.05, y, w: 0.8, h: 0.5, valign: 'middle', fontFace: 'Arial', bold: key, color: key ? NAVY : BLACK });
+      txt(s, '−' + v.toFixed(2), { x: cx - v * sc - 1.05, y, w: 1.0, h: 0.5, align: 'right', valign: 'middle', fontFace: 'Arial', fontSize: 12, bold: key, color: key ? NAVY : BLACK });
+      txt(s, '＋' + v.toFixed(2), { x: cx + v * sc + 0.05, y, w: 1.0, h: 0.5, valign: 'middle', fontFace: 'Arial', fontSize: 12, bold: key, color: key ? NAVY : BLACK });
     });
     line(s, cx, top + 0.05, 0, 4.25, G2, 1);
     txt(s, '基本ケース −5.2', { x: cx - 1.0, y: top + 4.35, w: 2.0, h: 0.3, align: 'center', color: G1 });
@@ -284,7 +284,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     const v = [6.3, 2.4, 2.2].reverse();
     s.addChart(pres.charts.BAR, [{ name: 'その他', labels, values: v.map((x, i) => i === 0 ? 0 : x) }, { name: '推奨', labels, values: v.map((x, i) => i === 0 ? x : 0) }],
       Object.assign({}, chartBase, { x: L, y: 2.15, w: 7.2, h: 3.9, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;', valAxisMinVal: 0, valAxisMaxVal: 7 }));
-    txt(s, '現行維持の約3分の1', { x: L + 7.5, y: 4.95, w: 2.7, h: 0.35, bold: true, color: NAVY });
+    txt(s, '現行維持の約3分の1', { x: L + 7.5, y: 4.95, w: 2.9, h: 0.35, bold: true, color: NAVY, fontSize: 12 });
     txt(s, '−4.1億円／年', { x: L + 7.5, y: 5.3, w: 2.7, h: 0.5, fontSize: 20, bold: true, color: NAVY, fontFace: 'Arial' });
   }
 
