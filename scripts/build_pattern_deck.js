@@ -5,6 +5,8 @@ const path = require('path');
 const OUT = process.argv[2] || 'pattern-deck.pptx';
 const { iconQueue } = require('./icons.js');
 const NOTES = require('./sample_notes.js');
+const READOUTS = require('./sample_readouts.js');
+const FRAMED = [];
 
 const pres = new pptxgen();
 pres.defineLayout({ name: 'A4_NRI', width: 10.833, height: 7.5 });
@@ -84,6 +86,7 @@ function frame(id, chapter, message, slideTitle, unit, notes, opts = {}) {
   if (note) txt(s, note, { x: L, y: 6.86, w: 8.6, h: 0.42, fontSize: 9, color: G1 });
   txt(s, String(pageNo), { x: R - 0.5, y: 7.08, w: 0.5, h: 0.2, fontSize: 9, color: G1, align: 'right' });
   s.addNotes(opts.rawNotes ? notes : `パターンID：${id}\n${notes}\n参考ページID：${(REFS[id] || []).join('、') || '未登録（slide-reference-library で収集後に追記）'}（画像はPCの参照ライブラリ/pages/）`);
+  s.__id = id; s.__cs = s._slideObjects.length; FRAMED.push(s);   // 本体の要素はここから後（withReadout で使う）
   return s;
 }
 
@@ -546,6 +549,24 @@ function fixLabelColors(xml) {
     return ser.replace(/(<c:dLbls>[\s\S]*?<a:defRPr[^>]*><a:solidFill><a:srgbClr val=")[0-9A-Fa-f]{6}/, `$1${color}`);
   });
 }
+
+// 読み取り帯を置く型：本体の要素を左約3分の2に縮め、右に帯を置く（sample_readouts.js）
+function withReadout(s, blocks) {
+  const f = (W - PANEL_W - 0.25) / W, EMU = 914400;
+  s._slideObjects.slice(s.__cs).forEach(o => {
+    const op = o.options || {};
+    if (o._type === 'table') {
+      if (typeof op.x === 'number') op.x = Math.round((L + (op.x / EMU - L) * f) * EMU);
+      if (typeof op.w === 'number') op.w = Math.round(op.w * f);
+      if (Array.isArray(op.colW)) op.colW = op.colW.map(c => c * f);
+    } else {
+      if (typeof op.x === 'number') op.x = L + (op.x - L) * f;
+      if (typeof op.w === 'number') op.w = op.w * f;
+    }
+  });
+  readout(s, blocks);
+}
+FRAMED.forEach(s => { if (READOUTS[s.__id] && s.__id !== 'EX') withReadout(s, READOUTS[s.__id]); });
 
 ICON.flush()
   .then(() => pres.write({ outputType: 'nodebuffer' }))
