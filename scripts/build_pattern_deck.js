@@ -83,7 +83,7 @@ function frame(id, chapter, message, slideTitle, unit, notes, opts = {}) {
   // 注記・出所・ページ番号
   // 注記・出所：型ごとに要るものだけ（scripts/sample_notes.js）。無い型は既定の一文
   const note = opts.source !== undefined ? opts.source : (NOTES[id] !== undefined ? NOTES[id] : '注）名称・数値はすべて架空の見本。実際の資料ではエビデンスExcelの値に差し替える\n出所）みなと市「バス路線別輸送実績」（2026年3月）を基に作成（架空の出所）');
-  if (note) txt(s, note, { x: L, y: 6.86, w: 8.6, h: 0.42, fontSize: 9, color: G1 });
+  if (note) txt(s, note, { x: L, y: 6.86, w: W - 0.7, h: 0.42, fontSize: 9, color: G1 });
   txt(s, String(pageNo), { x: R - 0.5, y: 7.08, w: 0.5, h: 0.2, fontSize: 9, color: G1, align: 'right' });
   s.addNotes(opts.rawNotes ? notes : `パターンID：${id}\n${notes}\n参考ページID：${(REFS[id] || []).join('、') || '未登録（slide-reference-library で収集後に追記）'}（画像はPCの参照ライブラリ/pages/）`);
   s.__id = id; s.__msg = message; s.__cs = s._slideObjects.length; FRAMED.push(s);   // 本体の要素はここから後（withReadout で使う）
@@ -570,6 +570,7 @@ FRAMED.forEach(s => {
   if (s.__id === 'EX') { const hit = READOUTS.EX.find(([k]) => (s.__msg || '').startsWith(k)); if (hit) withReadout(s, hit[1]); }
   else if (READOUTS[s.__id]) withReadout(s, READOUTS[s.__id]);
 });
+if (process.env.DUMP_IDS) require('fs').writeFileSync(process.env.DUMP_IDS, FRAMED.map(s => `${s._slideNum}\t${s.__id}\t${(s.__msg || '').slice(0, 12)}`).join('\n'));
 
 ICON.flush()
   .then(() => pres.write({ outputType: 'nodebuffer' }))
