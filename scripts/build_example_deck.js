@@ -1,6 +1,6 @@
 // 通しの完成例：架空の地方鉄道「みなと鉄道」の運営形態の見直し（24枚）
 // 路線・数値はすべて架空。数値は互いに整合するよう設計し、計算値は検算済み（docs/example-calc.md 参照）。
-module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C, readout, PANEL_W }) {
+module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C, readout, PANEL_W, band }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const SRC = '注）路線・数値はすべて架空の完成例\n出所）架空のデータを基に作成';
   const OPT = (src) => ({ sticker: '架空の例', rawNotes: true, source: src === undefined ? SRC : src });

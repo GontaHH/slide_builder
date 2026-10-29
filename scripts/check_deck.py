@@ -256,7 +256,7 @@ def main(path, sample=False):
             if re.match(r"^[^。]{1,12}[：:]", msg): fails.append((i, "メッセージに「見出し：」の前置き"))
             if re.search(r"(です|ます)。?$", msg): fails.append((i, "メッセージが「です・ます」調"))
             if re.search(r"\d[\d,.]*\s?[万億千]?(円|人|件|t|トン|回|本)\s?[／/]\s?(年|人|日|月)", msg): warns.append((i, "メッセージの単位を記号で書いている。「年142億円」のように和文で書く（G-8）"))
-        if body_chars > 200: warns.append((i, f"本体の文字が多い（約{body_chars}字）"))
+        if body_chars > 450: warns.append((i, f"本体の文字が多い（約{body_chars}字）：450字を超えたら分ける（C-1）"))
         if i > 1 and msg:
             for tag, m in layout_checks(s, i):
                 (fails if tag == "FAIL" else warns).append((i, m))

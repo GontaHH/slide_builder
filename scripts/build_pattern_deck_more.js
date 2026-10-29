@@ -2,7 +2,7 @@
 // Jinba consulting-pptx-skill の型カタログ（62型）と外資系コンサルの公開資料の作法を参考に、
 // 既存20型で不足していた「構造で通す」「進め方・計画」「提示・締め」「数字で証明（シナリオ・感度）」を補う。
 // 2026-10-22：見本の値を架空の値（みなと市のバス事業）にし、箱で囲んだ器を「見出し＋線」に改めた（P22・P23・P32）。
-module.exports = function ({ pres, frame, txt, line, rect, readout, PANEL_W, head, rowRule, bullets, chartBase, C }) {
+module.exports = function ({ pres, frame, txt, line, rect, readout, PANEL_W, band, head, rowRule, bullets, chartBase, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
@@ -173,7 +173,8 @@ module.exports = function ({ pres, frame, txt, line, rect, readout, PANEL_W, hea
     const data = [[cell('', { border: bottom(G2, 1) }), cell('人口', { bold: true, align: 'center', border: bottom(G2, 1) }), cell('利用率', { bold: true, align: 'center', border: bottom(G2, 1) })]]
       .concat([['楽観', '−8%', '＋2pt'], ['基本', '−12%', '±0pt'], ['悲観', '−17%', '−2pt']].map((r, i) => r.map((c, j) => cell(c, { align: j === 0 ? 'left' : 'center', fontFace: j === 0 ? F : 'Arial', bold: i === 1, color: i === 1 ? NAVY : BLACK, border: i < 2 ? bottom() : none }))));
     s.addTable(data, { x: rx, y: 2.15, w: rw, colW: [1.0, (rw - 1.0) / 2, (rw - 1.0) / 2], rowH: [0.5, 0.7, 0.7, 0.7] });
-    rowRule(s, rx, 4.95, rw);
+    band(s, rx, 3.35, rw, 0.7);
+    band(s, rx, 5.05, rw, 0.8);
     txt(s, '今の路線網の維持には、2025年度比80以上の利用者数が要る', { x: rx, y: 5.1, w: rw, h: 0.7, bold: true, color: NAVY });
   }
 
@@ -237,6 +238,7 @@ module.exports = function ({ pres, frame, txt, line, rect, readout, PANEL_W, hea
     const data = [head2.map((h, j) => cell(h, { bold: true, align: j === 2 ? 'center' : 'left', border: bottom(G2, 1) }))]
       .concat(rows.map((r, i) => r.map((c, j) => cell(c, { align: j === 2 ? 'center' : 'left', fontSize: j === 2 ? 20 : 14, bold: i === 0 && j !== 2, color: i === 0 ? NAVY : (j === 2 ? G2 : BLACK), border: i < rows.length - 1 ? bottom() : none }))));
     s.addTable(data, { x: L, y: 2.1, w: W, colW: [3.0, 3.3, 1.0, W - 7.3], rowH: [0.5, 1.0, 1.0, 1.0, 1.0] });
+    band(s, L, 2.6, W, 1.0);
   }
 
   // ---------- P31 ヒートマップ表 ----------

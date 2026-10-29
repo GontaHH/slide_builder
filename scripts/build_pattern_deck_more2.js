@@ -1,7 +1,7 @@
 // 追加の型 P34〜P55（2026-10 追加・第2弾）
 // 外資系コンサルの公開資料（経産省委託調査報告書など）に多い見せ方と、Jinba 型カタログの残りの型を、本スキルの規定で作り直したもの。
 // 2026-10-22：見本の値を架空の値（みなと市のバス事業）にし、箱で囲んだ器を「見出し＋線」に改めた（P44・P48）。下半分が空いた型（P38・P39・P49）に中身を足した。
-module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, readout, PANEL_W, C }) {
+module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, readout, PANEL_W, band, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
   const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
@@ -272,6 +272,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
       ['技術', '予約型の配車システムが安くなる', '−50%', '導入費用は5年で半分になった', '事業者3社への聞き取り', false], ['競争', '病院・商業施設の送迎が増える', '年12路線', '市内で新たに始まった送迎の数', '市の届出の集計', false]].forEach(([k, t, v, d, src, key], i) => {
       const x = L + (i % 2) * (cw + 0.5), y = 2.1 + Math.floor(i / 2) * (ch + 0.25);
       head(s, x, y, cw, k + '　' + t, { key });
+      if (key) band(s, x, y + 0.45, cw, ch - 0.45);
       txt(s, v, num({ x, y: y + 0.55, w: cw, h: 0.75, fontSize: 30, bold: true, color: key ? NAVY : BLACK }));
       txt(s, d, { x, y: y + 1.35, w: cw, h: 0.35 });
       txt(s, '出所）' + src + '（架空）', { x, y: y + 1.75, w: cw, h: 0.28, fontSize: 9, color: G1 });
@@ -354,6 +355,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
     [['「バスがなくなったら、週2回の通院をどうすればよいのか分からない」', '沿線の高齢者（80代、一人暮らし）', true], ['「予約型になっても、病院の前で乗り降りできるなら困らない」', '沿線自治会 会長', false], ['「運転士が足りず、今の便数を保つだけで精一杯だ」', 'バス会社 運行管理者', false]].forEach(([q, who, key], i) => {
       const y = 2.2 + i * 1.45;
       line(s, L, y, 0, 1.05, key ? NAVY : G3, key ? 3 : 1.5);
+      if (key) band(s, L, y, W, 1.05);
       txt(s, q, { x: L + 0.3, y, w: W - 0.3, h: 0.6, fontSize: key ? 16 : 14, bold: key, color: key ? NAVY : BLACK, valign: 'middle' });
       txt(s, who, { x: L + 0.3, y: y + 0.65, w: W - 0.3, h: 0.35, color: G1 });
     });

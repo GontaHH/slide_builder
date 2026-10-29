@@ -52,6 +52,11 @@ function head(s, x, y, w, t, o = {}) {
   const r = o.key ? RULE.key : RULE.head;
   line(s, x, y + 0.38, w, 0, r.color, r.width);
 }
+// 強調の帯：言いたい行・枠の背面に淡い青（G5）を敷く。本体の最背面に回すので、文字や線より後に描いてよい
+function band(s, x, y, w, h, color = G5) {
+  s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color }, line: { type: 'none' } });
+  const o = s._slideObjects.pop(); s._slideObjects.splice(s.__cs, 0, o);
+}
 function rowRule(s, x, y, w) { line(s, x, y, w, 0, RULE.row.color, RULE.row.width); }
 // 箇条書き：記号は本文に打たず、段落の書式（buChar）で付ける（H-6）
 function bullets(s, items, o) {
@@ -131,6 +136,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   });
   const py = top + 3 * rh + 0.05;
   line(s, L, py, W, 0, NAVY, 1.5);
+  band(s, L, py, W, 0.9);
   txt(s, '提言', { x: L, y: py + 0.18, w: 1.1, h: 0.32, bold: true, color: NAVY });
   txt(s, '支線12路線を2027年度から順次予約型交通に転換し、浮いた運転士で幹線を1時間3本に増やす。初年度に推進室を設け、収支と利用者数を四半期ごとに管理する', { x: L + 1.3, y: py + 0.18, w: W - 1.3, h: 1.0, bold: true, color: NAVY });
 }
@@ -449,7 +455,7 @@ function readout(s, blocks, o = {}) {
   [['背景', '路線バス4路線の利用が10年で半減した'], ['取組', '4路線を予約型交通に切り替え、乗降地点を120か所に増やした'], ['体制', '町が運行を委託し、地元のタクシー2社が運行を担う'], ['成功の鍵', '運行前に病院と商業施設を乗降地点に組み込んだ']].forEach(([k, v], i) => {
     txt(s, k, { x: L, y, w: 1.3, h: 0.7, fontSize: 14, bold: true, color: G1, valign: 'middle' });
     txt(s, v, { x: L + 1.4, y, w: lw - 1.4, h: 0.7, fontSize: 14, valign: 'middle', bold: i === 3 });
-    if (i < 3) rowRule(s, L, y + 0.92, lw);
+    if (i < 3) rowRule(s, L, y + 0.92, lw); else band(s, L, y - 0.1, lw, 0.9);
     y += 1.1;
   });
   const rx = L + lw + 0.5, rw = R - rx;
@@ -488,6 +494,7 @@ function readout(s, blocks, o = {}) {
     ['2　費用を抑える', [['2-1', '支線12路線を予約型交通に転換する', '2027年度', true], ['2-2', '運転士を支線から幹線へ再配置する', '2027年度', true], ['2-3', '車両の更新を小型車に切り替える', '2029年度', false]]],
     ['3　体制を整える', [['3-1', '市に交通の推進室を設ける', '2027年度', false], ['3-2', '収支と利用者数を四半期ごとに管理する', '2027年度', false]]]];
   head(s, L, 2.1, W - 1.4, '施策');
+  band(s, L + 2.65, 3.74, W - 2.65, 1.0);
   head(s, R - 1.3, 2.1, 1.3, '着手時期', { align: 'right' });
   let y = 2.62;
   groups.forEach(([g, items], gi) => {
@@ -525,7 +532,7 @@ function readout(s, blocks, o = {}) {
   });
 }
 
-const CTX = { pres, frame, txt, line, rect, head, rowRule, bullets, RULE, chartBase, readout, PANEL_W, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y, TOP } };
+const CTX = { pres, frame, txt, line, rect, head, rowRule, bullets, RULE, chartBase, readout, PANEL_W, band, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y, TOP } };
 require('./build_pattern_deck_more.js')(CTX);
 require('./build_pattern_deck_more2.js')(CTX);
 require('./build_pattern_deck_more3.js')(CTX);
@@ -560,8 +567,10 @@ function withReadout(s, blocks) {
       if (typeof op.w === 'number') op.w = Math.round(op.w * f);
       if (Array.isArray(op.colW)) op.colW = op.colW.map(c => c * f);
     } else {
+      const label = o._type === 'text' && Array.isArray(o.text) && o.text.length && typeof op.h === 'number' && op.h <= 0.5;
       if (typeof op.x === 'number') op.x = L + (op.x - L) * f;
-      if (typeof op.w === 'number') op.w = op.w * f;
+      // 1行のラベルは幅を縮めない（折り返して2行になるのを防ぐ）。本体の右端は越えない
+      if (typeof op.w === 'number') op.w = label ? Math.max(op.w * f, Math.min(op.w, R - PANEL_W - 0.25 - op.x)) : op.w * f;
     }
   });
   readout(s, blocks);

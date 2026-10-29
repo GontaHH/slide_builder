@@ -2,7 +2,7 @@
 // 公開資料の新型候補（MCK01・BCG01）と、外資系コンサルの資料に多い図法（ダンベル、スロープ、ブレット、パレート、ファネル、分布、
 // カスタマージャーニー、体制図、ワークストリーム計画、年表、選択肢カード、関係者マップ）を、本スキルの規定で作り直したもの。
 // 見本の値は【】の空欄ではなく、それらしいダミー値にして、完成形の見た目を確かめられるようにしている。
-module.exports = function ({ pres, frame, txt, line, rect, icon, readout, PANEL_W, C }) {
+module.exports = function ({ pres, frame, txt, line, rect, icon, readout, PANEL_W, band, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BLUE5 } = C;
   const TINT = { color: BLUE5 };
   const shape = (s, type, x, y, w, h, o) => s.addShape(pres.shapes[type], Object.assign({ x, y, w, h }, o));
