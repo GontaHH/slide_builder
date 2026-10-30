@@ -49,7 +49,7 @@ module.exports = function ({ pres, frame, txt, line, rect, icon, readout, PANEL_
       txt(s, t, { x: lx + 0.45, y, w: lw - 0.45, h: 0.56, valign: 'middle', bold: true, color: key ? NAVY : BLACK });
       line(s, lx, y + 1.15, lw, 0, G4, 0.75);
     });
-    require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', L + 3.78, 3.7, 0.36, { tone: 'gray' });
+    require('./mck_marks.js').cause(pres, s, L + 3.82, 3.7, 0.4);
     [['1', '運賃の上限を地域で一律に定める', 'A'], ['2', '乗継ぎの割引を事業者間で自動精算する', 'AB'], ['3', '予約と決済を1つのアプリにまとめる', 'AC'], ['4', '参入時の初期費用を3年間補助する', 'B'], ['5', '申請を年1回の一括申請に改める', 'C']].forEach(([n, t, ks], i) => {
       const y = top + 0.52 + i * 0.84;
       txt(s, n, num({ x: rx, y, w: 0.3, h: 0.6, valign: 'middle', bold: true, color: G1 }));

@@ -19,6 +19,7 @@ Claude のスキル **consulting-slide-builder**（スライド作成）と **sl
 | `scripts/compare_reference.py` | 手本のPDFと自分のデッキのPDFを同じ物差しで比べる（`python3 scripts/compare_reference.py 手本.pdf 自分.pdf --ref-pages 2-28 --own-pages 2-80`）。1ページごとに図の広さ・文字数・文字の段差・数字の割合・図に直接書いた文字の割合・注記の量・塗りの色数を測り、分布の重なりを類似度に、手本どうしの類似度との比を達成度として出す（I-5）。pdfplumber が必要 |
 | `scripts/one_navy.py` | 本体の紺を主役の1か所に絞る（`python3 scripts/one_navy.py deck.pptx`）。見本デッキの生成時にも自動で通る（G-6） |
 | `scripts/build_pattern_deck.js` | 見本デッキの再生成（`node scripts/build_pattern_deck.js patterns/pattern-deck.pptx`、pptxgenjs と sharp が必要：`npm i pptxgenjs sharp`）。P21以降は `build_pattern_deck_more*.js`（P72〜P78は `_more4.js`）、記号集・アイコン集は `build_symbol_icon_sheets.js`、パーツ集・テンプレート集は `build_template_sheets.js`、アイコンの目録は `icons.js` |
+| `scripts/mck_marks.js` | 矢印と印の共通部品（流れ・太い矢印・差の矢印・段の区切り・比較・番号の丸・因果の三角・合流）。公開資料 MCK04 の描き方に合わせたもの。既定は文字色とグレーで、紺は `key: true` のときだけ（docs/symbols.md） |
 | `scripts/add_guides.py` | スライドマスターにガイド線（①横+8.80 ②横+5.40 ③縦−13.20 ④縦+13.20 ⑤縦0、cm）を入れる（`python3 scripts/add_guides.py deck.pptx`）。見本デッキは生成時に入る |
 | `docs/chart-and-source-notes.md` | 図表・出所・注記・図解の作法の根拠（調べた資料とURL）と、出所の書き方の例 |
 | `docs/example-calc.md` | 完成例の数値の検算表 |

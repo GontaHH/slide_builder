@@ -3,7 +3,7 @@ from pptx import Presentation
 from lxml import etree
 
 # 指定色（rules/slide-rules.md B-3）：Navy・Blue1〜5・Gray1〜2・White・文字色・反対色
-PALETTE = {"000F78", "3C64AA", "83A0D3", "72DFF0", "E0EEF8", "C1DDF1", "CCCCCC", "7F7F7F", "FFFFFF", "3F3F3F", "D73232"}
+PALETTE = {"000F78", "3C64AA", "83A0D3", "72DFF0", "E0EEF8", "F2F2F2", "C1DDF1", "CCCCCC", "7F7F7F", "FFFFFF", "3F3F3F", "D73232"}
 ACCENT_RED = "D73232"
 PLACEHOLDER = re.compile(r"◯◯|○○|〇〇|XX|ＸＸ|ダミー|見本|lorem|TBD|テキストを入力|【(?!要確認)[^】]{1,15}】")
 SMALL_OK = ("注", "出所", "（", "(", "縦軸", "横軸", "【補足", "補足", "※")

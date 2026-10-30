@@ -17,7 +17,7 @@ const ICON = iconQueue(pres);
 
 const F = 'Yu Gothic UI';
 // 指定色（rules/slide-rules.md B-3）。BLACK・G1 は文字色（63 63 63）、G2＝Gray2、G3・G4＝Gray1、G5＝Blue4、BLUE5＝注目の面
-const NAVY = '000F78', BLACK = '3F3F3F', G1 = '3F3F3F', G2 = '7F7F7F', G3 = 'CCCCCC', G4 = 'CCCCCC', G5 = 'E0EEF8', WHITE = 'FFFFFF', BLUE5 = 'C1DDF1';
+const NAVY = '000F78', BLACK = '3F3F3F', G1 = '3F3F3F', G2 = '7F7F7F', G3 = 'CCCCCC', G4 = 'CCCCCC', G5 = 'F2F2F2', WHITE = 'FFFFFF', BLUE5 = 'C1DDF1';
 // ガイド線（rules/slide-rules.md B-1）。PowerPoint の表示と同じく、スライドの中心からの距離（cm）で持つ
 // ①スライドタイトルの上端 横+8.80 ②ボディの上端 横+5.40 ③左端 縦−13.20 ④右端 縦+13.20 ⑤中心 縦0
 const SLIDE_W = 10.833, SLIDE_H = 7.5, CM = 1 / 2.54;
@@ -52,7 +52,7 @@ function head(s, x, y, w, t, o = {}) {
   const r = o.key ? RULE.key : RULE.head;
   line(s, x, y + 0.38, w, 0, r.color, r.width);
 }
-// 強調の帯：言いたい行・枠の背面に淡い青（G5）を敷く。本体の最背面に回すので、文字や線より後に描いてよい
+// 強調の帯：言いたい行・枠の背面に淡いグレー（G5）を敷く。本体の最背面に回すので、文字や線より後に描いてよい
 function band(s, x, y, w, h, color = G5) {
   s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color }, line: { type: 'none' } });
   const o = s._slideObjects.pop(); s._slideObjects.splice(s.__cs, 0, o);
@@ -104,7 +104,7 @@ const chartBase = {
   catAxisLineShow: true, catAxisLineColor: G3, showLegend: false,
 };
 const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
-const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
+const tri = (s, x, y, w, h, color) => require('./mck_marks.js').cause(pres, s, x, y, Math.min(w, h) * 1.25, { key: color === NAVY });   // 因果の三角（グレーの塗りの細い三角）
 
 // ---------- 表紙 ----------
 {
@@ -158,6 +158,12 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
 
 // 右の読み取り帯（MCK04-p9・p17・p26）：本体の右約3分の1に淡い面を敷き、「太字の一文＋根拠2行」を2〜3段。紺は使わない（G-6）
 const PANEL_W = 3.3;
+// 積上げの言いたい行だけ紺にする：系列ごとの値 vals（行の並びはラベルと同じ）を「言いたい行だけの系列」と「それ以外の系列」に分ける。
+// 返り値は [言いたい行の系列..., それ以外の系列...]。chartColors は前半を紺、後半をグレーの濃淡にする
+function keyRow(vals, names, k) {
+  return vals.map((v, j) => ({ name: names[j] + '（強調）', values: v.map((x, i) => (i === k ? x : 0)) }))
+    .concat(vals.map((v, j) => ({ name: names[j], values: v.map((x, i) => (i === k ? 0 : x)) })));
+}
 function readout(s, blocks, o = {}) {
   const x = o.x || R - PANEL_W, w = R - x, y = o.y || 2.05, h = o.h || 4.65;
   s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: G5 }, line: { type: 'none' } });
@@ -253,13 +259,14 @@ function readout(s, blocks, o = {}) {
   const segs = [['通院', 0.45, [0.35, 0.25, 0.15, 0.25]], ['通学', 0.3, [0.2, 0.3, 0.3, 0.2]], ['買物', 0.25, [0.4, 0.2, 0.25, 0.15]]];
   const X = L + 0.1, Y = 2.15, TW = W - 1.45 - PANEL_W - 0.3, TH = 4.0;
   let x = X;
-  const cols = [G2, G3, NAVY, G5];
-  segs.forEach(([n, wr, shares]) => {
+  // 紺は対象の区画（通院のバス）だけ。他の列のバスは淡いグレー
+  segs.forEach(([n, wr, shares], si) => {
+    const cols = [G2, G3, si === 0 ? NAVY : G5, G3];
     const w = TW * wr; let y = Y;
     shares.forEach((sh, j) => {
       const h = TH * sh;
       s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: cols[j] }, line: { color: WHITE, width: 1.5 } });
-      txt(s, Math.round(sh * 100) + '%', num({ x, y, w, h, fontSize: 14, align: 'center', valign: 'middle', color: j === 2 || j === 0 ? WHITE : BLACK, bold: j === 2 }));
+      txt(s, Math.round(sh * 100) + '%', num({ x, y, w, h, fontSize: 14, align: 'center', valign: 'middle', color: cols[j] === NAVY || j === 0 ? WHITE : BLACK, bold: cols[j] === NAVY }));
       y += h;
     });
     txt(s, n + '（' + Math.round(wr * 100) + '%）', { x, y: Y + TH + 0.08, w, h: 0.32, fontSize: 14, align: 'center' });
@@ -475,13 +482,13 @@ function readout(s, blocks, o = {}) {
     '使う場面：アンケート結果。属性別の行を横の100%積上げで。設問文・n数・調査時期を必ず記載。注目の回答だけ紺。凡例はグラフの上に1行で置く。\n差し替え：属性・回答割合・設問文。');
   const labels = ['全体', '10〜20代', '30〜40代', '50〜60代', '70代以上'].reverse();
   s.addChart(pres.charts.BAR, [
-    { name: 'そう思う', labels, values: [52, 40, 44, 50, 55].reverse() },
-    { name: 'ややそう思う', labels, values: [20, 22, 25, 22, 22].reverse() },
+    // 紺は言いたい行（70代以上の「そう思う」＋「ややそう思う」＝77%）だけ。他の行はグレーの濃淡
+    ...keyRow([[52, 40, 44, 50, 55], [20, 22, 25, 22, 22]].map(v => v.reverse()), ['そう思う', 'ややそう思う'], 0),
     { name: 'どちらでもない', labels, values: [15, 20, 17, 16, 13].reverse() },
     { name: 'そう思わない', labels, values: [13, 18, 14, 12, 10].reverse() },
-  ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W - PANEL_W - 0.25, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
-  const lg = [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']];
-  lg.forEach(([n, c], i) => { const x = L + 0.75 + i * 1.5; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.18, h: 0.18, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.24, y: 2.11, w: 1.35, h: 0.3, fontSize: 12, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
+  ].map(d => Object.assign({ labels }, d)), Object.assign({}, chartBase, { x: L, y: 2.5, w: W - PANEL_W - 0.25, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8', 'F2F2F2'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE, dataLabelFormatCode: '0;;' }));
+  const lg = [['そう思う', '7F7F7F'], ['ややそう思う', 'CCCCCC'], ['どちらでもない', 'E0EEF8'], ['そう思わない', 'F2F2F2']];
+  lg.forEach(([n, c], i) => { const x = L + 0.75 + i * 1.5; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.18, h: 0.18, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.24, y: 2.11, w: 1.35, h: 0.3, fontSize: 12 }); });
   readout(s, [['70代以上の77%が存続を望む', '「そう思う」と「ややそう思う」の計。若い世代ほど低く、10〜20代は62%にとどまる'],
     ['反対は全体の13%にとどまる', '存続の是非ではなく、どの形で維持するかが議論の中心になる']]);
 }
@@ -532,7 +539,7 @@ function readout(s, blocks, o = {}) {
   });
 }
 
-const CTX = { pres, frame, txt, line, rect, head, rowRule, bullets, RULE, chartBase, readout, PANEL_W, band, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y, TOP } };
+const CTX = { pres, frame, txt, line, rect, head, rowRule, bullets, RULE, chartBase, readout, PANEL_W, band, keyRow, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y, TOP } };
 require('./build_pattern_deck_more.js')(CTX);
 require('./build_pattern_deck_more2.js')(CTX);
 require('./build_pattern_deck_more3.js')(CTX);

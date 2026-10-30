@@ -3,7 +3,7 @@
 // 型の見本（P01〜P80）は架空の値で「完成形の見た目」を示すのに対し、テンプレート集は中身を空けた骨組み（XX）で、
 // 新しいスライドを作るときにコピーして中身を入れる。使う場面と対応する型はノートに書いた。
 // 元の書式の「Original Icons」は再配布できるか分からないため入れていない（アイコンは templates/icons/ を使う）。
-const { hgArrow, hgCircle } = require('./hg_arrows.js');
+const M = require('./mck_marks.js');
 module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const MID = L + W / 2;                                   // ガイド線⑤（中心）
@@ -17,8 +17,8 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
   const ml = (s, items, o) => s.addText(items.map(([t, lv]) => ({
     text: t, options: { bullet: { code: lv < 0 ? '25A0' : lv === 0 ? '2022' : '2013', indent: 12 }, indentLevel: Math.max(lv, 0), paraSpaceAfter: 2, bold: lv < 0 },
   })), Object.assign({ isTextBox: true, fontFace: F, fontSize: 14, color: BLACK, margin: 0, valign: 'top' }, o));
-  const badge = (s, x, y, n, d, color) => { shape(s, 'OVAL', x, y, d || 0.3, d || 0.3, { fill: { color: color || NAVY }, line: { type: 'none' } }); txt(s, String(n), num({ x, y, w: d || 0.3, h: d || 0.3, fontSize: 12, bold: true, color: WHITE, align: 'center', valign: 'middle' })); };
-  const arrowMark = (s, x, y, d) => hgCircle(pres, s, x, y, d, { tone: 'accent' });
+  const badge = (s, x, y, n, d, color) => { shape(s, 'OVAL', x, y, d || 0.3, d || 0.3, { fill: { color: color || BLACK }, line: { type: 'none' } }); txt(s, String(n), num({ x, y, w: d || 0.3, h: d || 0.3, fontSize: 12, bold: true, color: WHITE, align: 'center', valign: 'middle' })); };
+  const arrowMark = (s, x, y, d) => M.step(pres, s, x + d / 2, y + d / 2, d);   // 段の区切り（白い丸に細い「＞」、MCK04-p5）
   // 列見出しの矢印の線（工程の順番を示す「──>」）
   const arrowHead = (s, x, y, w, t) => {
     txt(s, t, { x, y: y - 0.36, w: w - 0.15, h: 0.32, align: 'center', bold: true, valign: 'bottom' });
@@ -39,12 +39,12 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
   // S05 パーツ集①：文字・箱・矢印
   // =====================================================================
   {
-    const s = frame('S05', '記号集', '箱は淡い塗りと上線の2種類を基本にし、濃い塗りは1枚に1か所だけ使う。矢印は強調する1つだけを紺、他はグレーで描く', 'パーツ集（文字・箱・矢印）', null,
+    const s = frame('S05', '記号集', '箱はグレーの淡い塗りと上線の2種類を基本にし、紺の塗りは1枚に1か所だけ使う。矢印と印は文字色とグレーで描き、色で飾らない', 'パーツ集（文字・箱・矢印）', null,
       'パーツ集①（自作の書式 HG_pptFMT のパーツ集を指定色で描き直したもの）。関連する型：P11、P22、P23、T13、T17。\n元の書式の赤・オレンジの箱は、指定色（rules B-3）に無いため入れていない。悪化・未達の強調は反対色の文字（#D73232）で示す。',
       { sticker: '記号集', rawNotes: true, source: '注）色は rules/slide-rules.md B-3 の指定色。図形はこのスライドからコピーして使う\n出所）自作の書式（HG_pptFMT）のパーツ集を基に作成' });
     head(s, L, Y0, 4.2, '文字の階層');
     ml(s, [['見出し（14pt太字）', -1], ['第1階層（14pt）', 0], ['第2階層（14pt）', 1]], { x: L, y: Y0 + 0.5, w: 4.2, h: 0.85 });
-    head(s, L, Y0 + 1.45, 4.2, '箱の4種類（左：紺、右：グレー）');
+    head(s, L, Y0 + 1.45, 4.2, '箱の4種類（左：強調の1か所、右：基本）');
     const kinds = [['濃い塗り', 'dark'], ['淡い塗り', 'light'], ['上線だけ', 'top'], ['枠線だけ', 'frame']];
     kinds.forEach(([k, kind], i) => {
       const y = Y0 + 1.98 + i * 0.58;
@@ -58,18 +58,16 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
         txt(s, 'XX', { x: x + 0.1, y, w: w - 0.2, h, valign: 'middle', bold: true, color: kind === 'dark' ? WHITE : BLACK });
       });
     });
-    line(s, L + 4.05, Y0 + 2.56, 0, 1.04, NAVY, 1.5);
-    txt(s, '補足：基本はこの2つ', { x: L + 4.1, y: Y0 + 2.5, w: 0.3, h: 1.6, fontSize: 11, color: NAVY, vert: 'eaVert' });
+    line(s, L + 4.05, Y0 + 2.56, 0, 1.04, G2, 1);
+    txt(s, '補足：基本はこの2つ', { x: L + 4.1, y: Y0 + 2.5, w: 0.3, h: 1.6, fontSize: 11, color: G1, vert: 'eaVert' });
     const rx = L + 4.9, rw = R - rx;
-    head(s, rx, Y0, 3.25, '矢印（右2列は下向き）');
-    // HG_pptFMT のパーツ集と同じ4×4（左2列：右向き、右2列：下向き）。図形は scripts/hg_arrows.js
-    const gs = 0.62, gx = rx + 0.05, gy = Y0 + 0.55, sz = 0.34;
-    const grid = [[['double', 'r', 'accent'], ['triStroke', 'r', 'accent'], ['double', 'd', 'accent'], ['triStroke', 'd', 'accent']],
-      [['double', 'r', 'gray'], ['triStroke', 'r', 'gray'], ['double', 'd', 'gray'], ['triStroke', 'd', 'gray']],
-      [['circle', 'r', 'gray'], ['circle', 'r', 'accent']],
-      [['line', 'r', 'gray'], ['lineDouble', 'r', 'accent']]];
-    grid.forEach((row, i) => row.forEach(([k, dir, tone], j) => hgArrow(pres, s, k, gx + j * gs + (dir === 'd' ? 0.02 : 0.08), gy + i * gs + (dir === 'd' ? 0.08 : 0.02), sz, { dir, tone })));
-    ['二重の矢羽', '三角＋線', '丸', '線'].forEach((n, i) => txt(s, n, { x: gx + 4 * gs, y: gy + i * gs, w: 0.8, h: sz + 0.04, fontSize: 11, valign: 'middle', color: G1 }));
+    head(s, rx, Y0, 3.25, '矢印と印（MCK04の描き方）');
+    // 図形は scripts/mck_marks.js。既定は文字色・グレー、紺は主役の1つだけ
+    const ax = rx + 0.1, aw = 1.2, ly = (i) => Y0 + 0.72 + i * 0.44;
+    const marks = [['流れ', (y) => M.flow(pres, s, ax, y, ax + aw, y)], ['太い矢印', (y) => M.bold(pres, s, ax, y, ax + aw, y)],
+      ['下向き', (y) => M.bold(pres, s, ax + aw / 2, y - 0.2, ax + aw / 2, y + 0.2)], ['段の区切り', (y) => { M.seg(pres, s, ax + aw / 2, y - 0.22, ax + aw / 2, y + 0.22, G3, 0.75); M.step(pres, s, ax + aw / 2, y, 0.32); }],
+      ['比較', (y) => M.compare(pres, s, ax + aw / 2, y, 0.34)], ['因果', (y) => M.cause(pres, s, ax + aw / 2 - 0.1, y - 0.18, 0.36)]];
+    marks.forEach(([n, draw], i) => { draw(ly(i)); txt(s, n, { x: ax + aw + 0.2, y: ly(i) - 0.16, w: 1.5, h: 0.32, fontSize: 12, valign: 'middle', color: G1 }); });
     const cx = rx + 3.4, cw = R - cx;
     [0, 1].forEach(i => {
       const y = Y0 + 0.75 + i * 1.15;
@@ -86,18 +84,18 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
   // S06 パーツ集②：番号・演算子・状態の印
   // =====================================================================
   {
-    const s = frame('S06', '記号集', '番号・演算子・状態の印は文字を打たずに図形で作り、紺を基本、比べる相手はグレーにする。1枚で使う形は1種類にそろえる', 'パーツ集（番号・演算子・状態の印）', null,
+    const s = frame('S06', '記号集', '番号・演算子・状態の印は文字を打たずに図形で作り、文字色とグレーを基本にする。紺にするのは強調する1つだけで、1枚で使う形は1種類にそろえる', 'パーツ集（番号・演算子・状態の印）', null,
       'パーツ集②。関連する型：P10、P29、P51、P57、T04、T09、T15。\n丸数字（①）の文字は環境で崩れるため使わず、このスライドの図形をコピーする。',
       { sticker: '記号集', rawNotes: true, source: '注）図形はこのスライドからコピーして使う。数字は Arial の白抜き\n出所）自作の書式（HG_pptFMT）のパーツ集を基に作成' });
     const colW = (W - 0.6) / 3;
     const cols = [L, L + colW + 0.3, L + 2 * (colW + 0.3)];
-    head(s, cols[0], Y0, colW, '番号（左：紺、右：グレー）');
+    head(s, cols[0], Y0, colW, '番号（左：基本、右：強調の1つ）');
     ['四角', 'ひし形', '丸'].forEach((k, j) => {
       const x = cols[0] + j * 1.05;
       txt(s, k, { x, y: Y0 + 0.5, w: 0.9, h: 0.3, align: 'center' });
       [1, 2, 3, 4].forEach((n, i) => {
         const y = Y0 + 0.9 + i * 0.48;
-        [NAVY, G2].forEach((c, m) => {
+        [BLACK, NAVY].forEach((c, m) => {
           const bx = x + 0.1 + m * 0.42;
           const type = j === 0 ? 'RECTANGLE' : j === 1 ? 'DIAMOND' : 'OVAL';
           shape(s, type, bx, y, 0.32, 0.32, { fill: { color: c }, line: { type: 'none' } });
@@ -108,21 +106,21 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
     head(s, cols[1], Y0, colW, '演算子（計算式・T15）');
     [['＋', '足す'], ['−', '引く'], ['×', '掛ける'], ['÷', '割る'], ['＝', '等しい'], ['≒', 'ほぼ等しい']].forEach(([g, n], i) => {
       const x = cols[1] + (i % 2) * (colW / 2), y = Y0 + 0.6 + Math.floor(i / 2) * 0.62;
-      shape(s, 'OVAL', x, y, 0.36, 0.36, { fill: { color: NAVY }, line: { type: 'none' } });
-      txt(s, g, { x, y, w: 0.36, h: 0.36, fontSize: 14, bold: true, color: WHITE, align: 'center', valign: 'middle' });
+      shape(s, 'OVAL', x, y, 0.36, 0.36, { fill: { color: WHITE }, line: { color: G2, width: 0.75 } });
+      txt(s, g, { x, y, w: 0.36, h: 0.36, fontSize: 14, bold: true, color: BLACK, align: 'center', valign: 'middle' });
       txt(s, n, { x: x + 0.45, y, w: colW / 2 - 0.5, h: 0.36, valign: 'middle' });
     });
     head(s, cols[2], Y0, colW, '状態の印');
     [['✓', '完了・該当'], ['↑', '増える・上がる'], ['↓', '減る・下がる'], ['？', '未確認・論点'], ['→', '次へ・移行']].forEach(([g, n], i) => {
       const y = Y0 + 0.55 + i * 0.46;
-      shape(s, 'OVAL', cols[2], y, 0.34, 0.34, { fill: { color: NAVY }, line: { type: 'none' } });
+      shape(s, 'OVAL', cols[2], y, 0.34, 0.34, { fill: { color: G2 }, line: { type: 'none' } });
       txt(s, g, { x: cols[2], y, w: 0.34, h: 0.34, fontSize: 13, bold: true, color: WHITE, align: 'center', valign: 'middle' });
       txt(s, n, { x: cols[2] + 0.45, y, w: colW - 0.5, h: 0.34, valign: 'middle' });
     });
     icon(s, 'refresh-cw', cols[2], Y0 + 2.88, 0.34, G2);
     txt(s, '循環（P45）', { x: cols[2] + 0.45, y: Y0 + 2.88, w: colW - 0.5, h: 0.36, valign: 'middle' });
     head(s, L, Y0 + 3.25, W, '使い分け');
-    ml(s, [['番号は後のページで参照するときだけ振る。並列の項目には振らない', 0], ['番号の形（四角・ひし形・丸）は1つの資料で1種類にそろえ、強調する番号だけ紺にする', 0], ['状態の印は凡例で意味を書き、信号機の3色（赤・黄・緑）にしない', 0]], { x: L, y: Y0 + 3.72, w: W, h: 0.85 });
+    ml(s, [['番号は後のページで参照するときだけ振る。並列の項目には振らない', 0], ['番号の形（四角・ひし形・丸）は1つの資料で1種類にそろえ、基本は文字色、強調する番号だけ紺にする', 0], ['演算子は白い丸に細い線、状態の印はグレーの丸にし、凡例で意味を書く。信号機の3色（赤・黄・緑）にしない', 0]], { x: L, y: Y0 + 3.72, w: W, h: 0.85 });
   }
 
   // =====================================================================
@@ -148,7 +146,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
       '使う場面：報告書・提案書の冒頭の構成。対応する型：P34（全体マップ）。\n章が8つを超えるなら、章を束ね直す。', null);
     [1, 2, 3, 4, 5, 6, 7].forEach((n, i) => {
       const y = BODY_Y + 0.05 + i * 0.68;
-      fill(s, L, y, 0.05, 0.52, NAVY);
+      fill(s, L, y, 0.05, 0.52, G2);
       fill(s, L + 0.12, y, 5.6, 0.52, G5);
       txt(s, n + '.', num({ x: L + 0.25, y, w: 0.5, h: 0.52, valign: 'middle', fontSize: 16 }));
       txt(s, 'XX', { x: L + 0.8, y, w: 4.8, h: 0.52, valign: 'middle', fontSize: 16 });
@@ -176,12 +174,12 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
       '使う場面：会議資料の冒頭。対応する型：P56（時間配分付きアジェンダ）。\nゴールは「何が決まれば終わりか」を書く。', null);
     const boxH1 = 1.3, y2 = BODY_Y + boxH1 + 0.55;
     frameBox(s, L, BODY_Y, W, boxH1, G2);
-    icon(s, 'target', L + 0.15, BODY_Y + 0.12, 0.32, NAVY);
+    icon(s, 'target', L + 0.15, BODY_Y + 0.12, 0.32, G2);
     txt(s, '本日のゴール', { x: L + 0.55, y: BODY_Y + 0.12, w: 2.0, h: 0.32, bold: true, valign: 'middle' });
     ml(s, [['XX', 0], ['XX', 0]], { x: L + 0.55, y: BODY_Y + 0.55, w: W - 0.8, h: 0.7 });
-    hgArrow(pres, s, 'double', MID - 0.19, BODY_Y + boxH1 + 0.06, 0.38, { dir: 'd', tone: 'accent' });
+    M.step(pres, s, MID, BODY_Y + boxH1 + 0.25, 0.34, { dir: 'd' });
     frameBox(s, L, y2, W, 6.65 - y2, G2);
-    icon(s, 'file-text', L + 0.15, y2 + 0.12, 0.32, NAVY);
+    icon(s, 'file-text', L + 0.15, y2 + 0.12, 0.32, G2);
     txt(s, '本日のアジェンダ', { x: L + 0.55, y: y2 + 0.12, w: 2.4, h: 0.32, bold: true, valign: 'middle' });
     [1, 2, 3].forEach((n, i) => {
       const y = y2 + 0.62 + i * 0.9;
@@ -359,7 +357,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
       fill(s, x, by, bw, bh, key ? BLUE5 : G5);
       if (j === 2) { txt(s, '項3', { x, y: by + 0.02, w: bw, h: 0.33, align: 'center' }); line(s, x + 0.25, by + bh / 2, bw - 0.5, 0, BLACK, 0.75); txt(s, '項4', { x, y: by + 0.4, w: bw, h: 0.33, align: 'center' }); }
       else txt(s, key ? '算定値' : '項' + (j + 1), { x, y: by, w: bw, h: bh, align: 'center', valign: 'middle', bold: key, color: key ? NAVY : BLACK });
-      if (j < 3) { const ox = x + bw + ow / 2 - 0.16; shape(s, 'OVAL', ox, by + bh / 2 - 0.16, 0.32, 0.32, { fill: { color: NAVY }, line: { type: 'none' } }); txt(s, ops[j], { x: ox, y: by + bh / 2 - 0.16, w: 0.32, h: 0.32, bold: true, color: WHITE, align: 'center', valign: 'middle' }); }
+      if (j < 3) { const ox = x + bw + ow / 2 - 0.16; shape(s, 'OVAL', ox, by + bh / 2 - 0.16, 0.32, 0.32, { fill: { color: WHITE }, line: { color: G2, width: 0.75 } }); txt(s, ops[j], { x: ox, y: by + bh / 2 - 0.16, w: 0.32, h: 0.32, bold: true, color: BLACK, align: 'center', valign: 'middle' }); }
       ml(s, [['XX', 0], ['XX', 1], ['出所：XX', 1]], { x, y: by + 1.6, w: bw, h: 2.2 });
     });
     rowRule(s, x0, by + 1.35, R - x0);
@@ -403,7 +401,7 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, icon, 
       const y = Y0 + 0.55 + i * rh;
       fill(s, L, y, c1, rh - 0.15, G3);
       ml(s, [['課題／事象' + n, -1], ['XX', 0], ['XX', 1]], { x: L + 0.1, y: y + 0.08, w: c1 - 0.2, h: rh - 0.3 });
-      hgArrow(pres, s, 'triStroke', ax, y + rh / 2 - 0.2, 0.32, { tone: 'accent' });
+      M.cause(pres, s, ax, y + rh / 2 - 0.18, 0.36);
       txt(s, 'XX', { x: c2x, y: y + 0.05, w: c2 - 0.15, h: 0.35, bold: true });
       line(s, c2x + c2, y, 0, rh - 0.15, G2, 0.75);
       ml(s, [['XX', -1], ['XX', 0], ['XX', 1]], { x: c3x, y: y + 0.05, w: R - c3x, h: rh - 0.25 });

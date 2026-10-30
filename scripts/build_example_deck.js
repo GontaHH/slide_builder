@@ -1,6 +1,6 @@
 // 通しの完成例：架空の地方鉄道「みなと鉄道」の運営形態の見直し（24枚）
 // 路線・数値はすべて架空。数値は互いに整合するよう設計し、計算値は検算済み（docs/example-calc.md 参照）。
-module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C, readout, PANEL_W, band }) {
+module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C, readout, PANEL_W, band, keyRow }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const SRC = '注）路線・数値はすべて架空の完成例\n出所）架空のデータを基に作成';
   const OPT = (src) => ({ sticker: '架空の例', rawNotes: true, source: src === undefined ? SRC : src });
@@ -145,10 +145,11 @@ module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullet
       N('P18 アンケート結果', 'E-04（沿線住民アンケート）', '検算：全体 41＋27＝68%'), OPT('注）設問「みなと鉄道を今後も残すべきだと思いますか」。無回答を除く\n出所）沿線住民アンケート（2026年5月、n＝1,200）を基に作成（架空の完成例）'));
     const labels = ['全体', '10〜20代', '30〜40代', '50〜60代', '70代以上'].reverse();
     s.addChart(pres.charts.BAR, [
-      { name: 'そう思う', labels, values: [41, 48, 35, 37, 45].reverse() }, { name: 'ややそう思う', labels, values: [27, 22, 27, 28, 29].reverse() },
-      { name: 'どちらでもない', labels, values: [18, 16, 22, 20, 15].reverse() }, { name: 'そう思わない', labels, values: [14, 14, 16, 15, 11].reverse() },
-    ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W - PANEL_W - 0.25, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
-    [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']].forEach(([n, c], i) => { const x = L + 0.75 + i * 1.5; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.18, h: 0.18, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.24, y: 2.11, w: 1.3, h: 0.3, color: i === 0 ? NAVY : BLACK, bold: i === 0, fontSize: 12 }); });
+      // 紺は言いたい行（全体の「そう思う」＋「ややそう思う」＝68%）だけ
+      ...keyRow([[41, 48, 35, 37, 45], [27, 22, 27, 28, 29]].map(v => v.reverse()), ['そう思う', 'ややそう思う'], 4),
+      { name: 'どちらでもない', values: [18, 16, 22, 20, 15].reverse() }, { name: 'そう思わない', values: [14, 14, 16, 15, 11].reverse() },
+    ].map(d => Object.assign({ labels }, d)), Object.assign({}, chartBase, { x: L, y: 2.5, w: W - PANEL_W - 0.25, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8', 'F2F2F2'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE, dataLabelFormatCode: '0;;' }));
+    [['そう思う', '7F7F7F'], ['ややそう思う', 'CCCCCC'], ['どちらでもない', 'E0EEF8'], ['そう思わない', 'F2F2F2']].forEach(([n, c], i) => { const x = L + 0.75 + i * 1.5; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.18, h: 0.18, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.24, y: 2.11, w: 1.3, h: 0.3, color: BLACK, bold: false, fontSize: 12 }); });
     readout(s, [['存続を望むのは68%', '「そう思う」41%と「ややそう思う」27%の計。「そう思わない」は14%にとどまる'],
       ['10〜20代と70代以上は7割以上', '通学と通院で日常的に使う層。この2つの層の足を確保できるかが、合意の前提になる']]);
   }

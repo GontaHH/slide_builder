@@ -4,7 +4,7 @@
 module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, readout, PANEL_W, band, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const arrow = (s, x, y, w, h, color, width) => s.addShape(pres.shapes.LINE, { x, y, w, h, line: { color: color || G2, width: width || 1, endArrowType: 'triangle' } });
-  const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
+  const tri = (s, x, y, w, h, color) => require('./mck_marks.js').cause(pres, s, x, y, Math.min(w, h) * 1.25, { key: color === NAVY });   // 因果の三角（グレーの塗りの細い三角）
   const cell = (t, o) => ({ text: t, options: Object.assign({ fontFace: F, fontSize: 14, valign: 'middle', color: BLACK }, o) });
   const bottom = (c, w) => [{ type: 'none' }, { type: 'none' }, { pt: w || 0.75, color: c || G4 }, { type: 'none' }];
   const none = [{ type: 'none' }, { type: 'none' }, { type: 'none' }, { type: 'none' }];
