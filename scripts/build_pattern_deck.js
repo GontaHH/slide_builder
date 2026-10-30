@@ -4,6 +4,9 @@ const pptxgen = require('pptxgenjs');
 const path = require('path');
 const OUT = process.argv[2] || 'pattern-deck.pptx';
 const { iconQueue } = require('./icons.js');
+const NOTES = require('./sample_notes.js');
+const READOUTS = require('./sample_readouts.js');
+const FRAMED = [];
 
 const pres = new pptxgen();
 pres.defineLayout({ name: 'A4_NRI', width: 10.833, height: 7.5 });
@@ -14,7 +17,7 @@ const ICON = iconQueue(pres);
 
 const F = 'Yu Gothic UI';
 // 指定色（rules/slide-rules.md B-3）。BLACK・G1 は文字色（63 63 63）、G2＝Gray2、G3・G4＝Gray1、G5＝Blue4、BLUE5＝注目の面
-const NAVY = '000F78', BLACK = '3F3F3F', G1 = '3F3F3F', G2 = '7F7F7F', G3 = 'CCCCCC', G4 = 'CCCCCC', G5 = 'E0EEF8', WHITE = 'FFFFFF', BLUE5 = 'C1DDF1';
+const NAVY = '000F78', BLACK = '3F3F3F', G1 = '3F3F3F', G2 = '7F7F7F', G3 = 'CCCCCC', G4 = 'CCCCCC', G5 = 'F2F2F2', WHITE = 'FFFFFF', BLUE5 = 'C1DDF1';
 // ガイド線（rules/slide-rules.md B-1）。PowerPoint の表示と同じく、スライドの中心からの距離（cm）で持つ
 // ①スライドタイトルの上端 横+8.80 ②ボディの上端 横+5.40 ③左端 縦−13.20 ④右端 縦+13.20 ⑤中心 縦0
 const SLIDE_W = 10.833, SLIDE_H = 7.5, CM = 1 / 2.54;
@@ -49,6 +52,11 @@ function head(s, x, y, w, t, o = {}) {
   const r = o.key ? RULE.key : RULE.head;
   line(s, x, y + 0.38, w, 0, r.color, r.width);
 }
+// 強調の帯：言いたい行・枠の背面に淡いグレー（G5）を敷く。本体の最背面に回すので、文字や線より後に描いてよい
+function band(s, x, y, w, h, color = G5) {
+  s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color }, line: { type: 'none' } });
+  const o = s._slideObjects.pop(); s._slideObjects.splice(s.__cs, 0, o);
+}
 function rowRule(s, x, y, w) { line(s, x, y, w, 0, RULE.row.color, RULE.row.width); }
 // 箇条書き：記号は本文に打たず、段落の書式（buChar）で付ける（H-6）
 function bullets(s, items, o) {
@@ -78,9 +86,12 @@ function frame(id, chapter, message, slideTitle, unit, notes, opts = {}) {
   // 見本ステッカー（右上。本番では「試算」「暫定」等に差し替えるか削除）
   txt(s, opts.sticker || '見本', { x: R - (opts.sticker ? 1.05 : 0.75), y: BODY_Y + 0.02, w: opts.sticker ? 1.05 : 0.75, h: 0.26, fontSize: 11, color: G1, align: 'center', valign: 'middle', line: { color: G3, width: 0.75 } });
   // 注記・出所・ページ番号
-  txt(s, opts.source || '注）名称・数値はすべて架空の見本。実際の資料ではエビデンスExcelの値に差し替える\n出所）みなと市「バス路線別輸送実績」（2026年3月）を基に作成（架空の出所）', { x: L, y: 6.86, w: 8.6, h: 0.42, fontSize: 9, color: G1 });
+  // 注記・出所：型ごとに要るものだけ（scripts/sample_notes.js）。無い型は既定の一文
+  const note = opts.source !== undefined ? opts.source : (NOTES[id] !== undefined ? NOTES[id] : '注）名称・数値はすべて架空の見本。実際の資料ではエビデンスExcelの値に差し替える\n出所）みなと市「バス路線別輸送実績」（2026年3月）を基に作成（架空の出所）');
+  if (note) txt(s, note, { x: L, y: 6.86, w: W - 0.7, h: 0.42, fontSize: 9, color: G1 });
   txt(s, String(pageNo), { x: R - 0.5, y: 7.08, w: 0.5, h: 0.2, fontSize: 9, color: G1, align: 'right' });
   s.addNotes(opts.rawNotes ? notes : `パターンID：${id}\n${notes}\n参考ページID：${(REFS[id] || []).join('、') || '未登録（slide-reference-library で収集後に追記）'}（画像はPCの参照ライブラリ/pages/）`);
+  s.__id = id; s.__msg = message; s.__cs = s._slideObjects.length; FRAMED.push(s);   // 本体の要素はここから後（withReadout で使う）
   return s;
 }
 
@@ -93,7 +104,7 @@ const chartBase = {
   catAxisLineShow: true, catAxisLineColor: G3, showLegend: false,
 };
 const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
-const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
+const tri = (s, x, y, w, h, color) => require('./mck_marks.js').cause(pres, s, x, y, Math.min(w, h) * 1.25, { key: color === NAVY });   // 因果の三角（グレーの塗りの細い三角）
 
 // ---------- 表紙 ----------
 {
@@ -125,6 +136,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   });
   const py = top + 3 * rh + 0.05;
   line(s, L, py, W, 0, NAVY, 1.5);
+  band(s, L, py, W, 0.9);
   txt(s, '提言', { x: L, y: py + 0.18, w: 1.1, h: 0.32, bold: true, color: NAVY });
   txt(s, '支線12路線を2027年度から順次予約型交通に転換し、浮いた運転士で幹線を1時間3本に増やす。初年度に推進室を設け、収支と利用者数を四半期ごとに管理する', { x: L + 1.3, y: py + 0.18, w: W - 1.3, h: 1.0, bold: true, color: NAVY });
 }
@@ -144,6 +156,26 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   });
 }
 
+// 右の読み取り帯（MCK04-p9・p17・p26）：本体の右約3分の1に淡い面を敷き、「太字の一文＋根拠2行」を2〜3段。紺は使わない（G-6）
+const PANEL_W = 3.3;
+// 積上げの言いたい行だけ紺にする：系列ごとの値 vals（行の並びはラベルと同じ）を「言いたい行だけの系列」と「それ以外の系列」に分ける。
+// 返り値は [言いたい行の系列..., それ以外の系列...]。chartColors は前半を紺、後半をグレーの濃淡にする
+function keyRow(vals, names, k) {
+  return vals.map((v, j) => ({ name: names[j] + '（強調）', values: v.map((x, i) => (i === k ? x : 0)) }))
+    .concat(vals.map((v, j) => ({ name: names[j], values: v.map((x, i) => (i === k ? 0 : x)) })));
+}
+function readout(s, blocks, o = {}) {
+  const x = o.x || R - PANEL_W, w = R - x, y = o.y || 2.05, h = o.h || 4.65;
+  s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: G5 }, line: { type: 'none' } });
+  const step = (h - 0.3) / blocks.length;
+  blocks.forEach(([lead, body], i) => {
+    const by = y + 0.2 + i * step;
+    if (i) line(s, x + 0.2, by - 0.12, w - 0.4, 0, G3, 0.75);
+    txt(s, lead, { x: x + 0.2, y: by, w: w - 0.4, h: 0.62, bold: true, fontSize: 14 });
+    txt(s, body, { x: x + 0.2, y: by + 0.66, w: w - 0.4, h: step - 0.85, fontSize: 12 });
+  });
+}
+
 // ---------- P03 縦棒の時系列＋CAGR ----------
 {
   const s = frame('P03', '1　現状', '予約型交通の利用者数は運行区域を広げた2019年度以降に年6.7%で増え、6.5万人に達した。支線の転換先として需要を受け止められる水準にある', '予約型交通の年間利用者数の推移', '（万人、2015–2025年度）',
@@ -152,9 +184,11 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   s.addChart(pres.charts.BAR, [
     { name: '区域拡大前', labels, values: [3.8, 4.1, 4.4, 0, 0, 0] },
     { name: '区域拡大後', labels, values: [0, 0, 0, 5.0, 5.7, 6.5] },
-  ], Object.assign({}, chartBase, { x: L, y: 2.55, w: W, h: 4.15, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;' }));
-  s.addShape(pres.shapes.LINE, { x: 5.6, y: 2.5, w: 3.8, h: -0.0, line: { color: NAVY, width: 1.25, endArrowType: 'triangle' } });
-  txt(s, '年平均 ＋6.7%（2019→2025年度）', { x: 5.3, y: 2.08, w: 4.4, h: 0.32, fontSize: 14, bold: true, color: NAVY, align: 'center' });
+  ], Object.assign({}, chartBase, { x: L, y: 2.55, w: W - PANEL_W - 0.25, h: 4.15, barDir: 'col', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '0.0;;' }));
+  s.addShape(pres.shapes.LINE, { x: L + 3.45, y: 2.5, w: 2.85, h: -0.0, line: { color: NAVY, width: 1.25, endArrowType: 'triangle' } });
+  txt(s, '年平均 ＋6.7%（2019→2025年度）', { x: L + 2.6, y: 2.08, w: 4.4, h: 0.32, fontSize: 12, bold: true, color: NAVY, align: 'center' });
+  readout(s, [['区域を広げた2019年度から伸びが加速した', '2015→2019年度は年3.7%、2019→2025年度は年6.7%。拡大した3地区が増加の7割を占める'],
+    ['支線の転換先として受け止められる', '支線12路線の利用者は年4.8万人で、予約型の6.5万人の4分の3に当たる']]);
 }
 
 // ---------- P04 降順の横棒比較 ----------
@@ -166,8 +200,9 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   s.addChart(pres.charts.BAR, [
     { name: 'その他', labels, values: v.map((x, i) => labels[i] === 'みなと市' ? 0 : x) },
     { name: '対象', labels, values: v.map((x, i) => labels[i] === 'みなと市' ? x : 0) },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.2, h: 4.65, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;' }));
-  txt(s, '上位3市の平均より\n9回少ない（23回→14回）', { x: 7.9, y: 4.6, w: 2.6, h: 0.7, fontSize: 14, bold: true, color: NAVY });
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: W - PANEL_W - 0.25, h: 4.65, barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: 40, chartColors: [G3, NAVY], showValue: true, dataLabelPosition: 'inEnd', dataLabelColor: WHITE, dataLabelFormatCode: '#,##0;;' }));
+  readout(s, [['上位3市の平均より9回少ない', '上位3市の平均は23回、みなと市は14回。8市の平均（16回）も下回る'],
+    ['差は運行本数で説明できる', '上位3市は人口千人当たりの1日運行本数が、みなと市の1.8倍（P08）']]);
 }
 
 // ---------- P05 100%積上げ ----------
@@ -180,10 +215,12 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     { name: '買物', labels, values: [35, 33, 30] },
     { name: '通院', labels, values: [15, 22, 32] },
     { name: 'その他', labels, values: [10, 10, 10] },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.6, h: 4.65, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: ['7F7F7F', 'CCCCCC', NAVY, 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 5.0, h: 4.65, barDir: 'col', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: ['7F7F7F', 'CCCCCC', NAVY, 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
   const names = [['その他', 2.55], ['通院', 3.35], ['買物', 4.45], ['通学', 5.6]];
-  names.forEach(([n, y]) => txt(s, n, { x: 8.05, y, w: 1.0, h: 0.3, fontSize: 14, color: n === '通院' ? NAVY : BLACK, bold: n === '通院' }));
-  txt(s, '＋17pt', num({ x: 8.95, y: 3.35, w: 1.5, h: 0.3, fontSize: 14, bold: true, color: NAVY }));
+  names.forEach(([n, y]) => txt(s, n, { x: L + 5.1, y, w: 0.9, h: 0.3, fontSize: 12, color: n === '通院' ? NAVY : BLACK, bold: n === '通院' }));
+  txt(s, '＋17pt', num({ x: L + 5.1, y: 3.65, w: 1.0, h: 0.3, fontSize: 12, bold: true, color: NAVY }));
+  readout(s, [['通院は10年で＋17pt、最も伸びた目的', '通院の利用者は年62万人から93万人に増えた。70歳以上の人口が2割増えたことが主因'],
+    ['通学は−12pt、生徒数の減少が続く', '沿線の高校生は10年で3割減った。2035年度には通学の割合が20%を下回る見込み（推計）']]);
 }
 
 // ---------- P06 ウォーターフォール（図形で作図） ----------
@@ -220,15 +257,16 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   const s = frame('P07', '1　現状', '沿線の移動の45%を占める通院で、みなとバスの分担率は15%にとどまる。最も大きな移動目的での存在感の低さが、利用減の根本にある', '目的別の移動回数と交通手段の分担率', '（幅＝移動回数の構成比、高さ＝分担率、2025年度）',
     '使う場面：規模と構成の両方が議論に必要なときだけ使う。片方だけなら棒グラフで足りる。\n差し替え：区分の幅（規模比）と分担率。対象の区画だけ紺。');
   const segs = [['通院', 0.45, [0.35, 0.25, 0.15, 0.25]], ['通学', 0.3, [0.2, 0.3, 0.3, 0.2]], ['買物', 0.25, [0.4, 0.2, 0.25, 0.15]]];
-  const X = L + 1.3, Y = 2.15, TW = W - 2.8, TH = 4.0;
+  const X = L + 0.1, Y = 2.15, TW = W - 1.45 - PANEL_W - 0.3, TH = 4.0;
   let x = X;
-  const cols = [G2, G3, NAVY, G5];
-  segs.forEach(([n, wr, shares]) => {
+  // 紺は対象の区画（通院のバス）だけ。他の列のバスは淡いグレー
+  segs.forEach(([n, wr, shares], si) => {
+    const cols = [G2, G3, si === 0 ? NAVY : G5, G3];
     const w = TW * wr; let y = Y;
     shares.forEach((sh, j) => {
       const h = TH * sh;
       s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: cols[j] }, line: { color: WHITE, width: 1.5 } });
-      txt(s, Math.round(sh * 100) + '%', num({ x, y, w, h, fontSize: 14, align: 'center', valign: 'middle', color: j === 2 || j === 0 ? WHITE : BLACK, bold: j === 2 }));
+      txt(s, Math.round(sh * 100) + '%', num({ x, y, w, h, fontSize: 14, align: 'center', valign: 'middle', color: cols[j] === NAVY || j === 0 ? WHITE : BLACK, bold: cols[j] === NAVY }));
       y += h;
     });
     txt(s, n + '（' + Math.round(wr * 100) + '%）', { x, y: Y + TH + 0.08, w, h: 0.32, fontSize: 14, align: 'center' });
@@ -236,8 +274,10 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   });
   ['自家用車', '家族の送迎', 'みなとバス', 'タクシー'].forEach((n, j) => {
     const yy = Y + TH * [0.17, 0.47, 0.67, 0.88][j] - 0.15;
-    txt(s, n, { x: X + TW + 0.12, y: yy, w: 1.35, h: 0.3, fontSize: 14, color: j === 2 ? NAVY : BLACK, bold: j === 2 });
+    txt(s, n, { x: X + TW + 0.12, y: yy, w: 1.35, h: 0.3, fontSize: 12, color: j === 2 ? NAVY : BLACK, bold: j === 2 });
   });
+  readout(s, [['通院は移動の45%、バスの分担率は15%', '通院の移動は年620万回で、バスが運ぶのは93万回。残りの8割強は車と送迎'],
+    ['家族の送迎が通院の25%を担う', '送迎する家族の6割が「負担が大きい」と回答した（アンケート、n＝1,200）']]);
 }
 
 // ---------- P08 散布図 ----------
@@ -250,9 +290,10 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     { name: 'X', values: xs.concat([32]) },
     { name: '類似市', values: ys.concat([null]) },
     { name: 'みなと市', values: xs.map(() => null).concat([14]) },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 7.6, h: 4.6, valAxisHidden: false, valAxisLabelFontSize: 12, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 0, valAxisMaxVal: 30, chartColors: [G3, NAVY], lineSize: 0, lineDataSymbolSize: 11, catAxisLabelColor: G1 }));
-  txt(s, 'みなと市\n同規模の市より\n年5回少ない', { x: 8.0, y: 3.55, w: 2.5, h: 1.0, fontSize: 14, bold: true, color: NAVY });
-  txt(s, '縦軸：1人当たり年間利用回数（回）\n横軸：人口千人当たりの1日運行本数（本）', { x: 8.0, y: 5.55, w: 2.5, h: 0.9, fontSize: 11, color: G1 });
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: W - PANEL_W - 0.25, h: 4.25, valAxisHidden: false, valAxisLabelFontSize: 12, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 0, valAxisMaxVal: 30, chartColors: [G3, NAVY], lineSize: 0, lineDataSymbolSize: 11, catAxisLabelColor: G1 }));
+  txt(s, '（縦軸：1人当たり年間利用回数（回）　横軸：人口千人当たりの1日運行本数（本））', { x: L, y: 6.35, w: W - PANEL_W - 0.25, h: 0.3, fontSize: 11, color: G1 });
+  readout(s, [['本数と利用回数の相関は強い', '相関係数は0.97。千人当たりの本数が10本多いと、利用は年4回多い'],
+    ['みなと市は同規模の市より年5回少ない', '本数は32本で11市の中位だが、利用は14回にとどまる。路線が利用の多い地区に合っていない']]);
 }
 
 // ---------- P09 折れ線（複数系列） ----------
@@ -264,10 +305,12 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     { name: '全国', labels, values: [100, 101, 102, 102, 103, 99, 100, 101, 102, 103, 104] },
     { name: '類似市', labels, values: [100, 99, 99, 98, 98, 95, 95, 96, 96, 96, 97] },
     { name: 'みなと市', labels, values: [100, 97, 95, 92, 90, 85, 84, 83, 81, 80, 78] },
-  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 8.2, h: 4.6, chartColors: [G3, G2, NAVY], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 12, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 70, valAxisMaxVal: 110 }));
-  txt(s, '全国', { x: 8.6, y: 2.55, w: 1.8, h: 0.3, fontSize: 14, color: G1 });
-  txt(s, '類似市', { x: 8.6, y: 3.25, w: 1.8, h: 0.3, fontSize: 14, color: G1 });
-  txt(s, 'みなと市\n全国との差 −26pt', { x: 8.6, y: 4.55, w: 1.9, h: 0.65, fontSize: 14, bold: true, color: NAVY });
+  ], Object.assign({}, chartBase, { x: L, y: 2.05, w: 5.75, h: 4.6, chartColors: [G3, G2, NAVY], lineSize: 2, lineDataSymbol: 'none', valAxisHidden: false, valAxisLabelFontSize: 12, valAxisLabelColor: G1, valAxisLineShow: false, valAxisMinVal: 70, valAxisMaxVal: 110 }));
+  txt(s, '全国 104', { x: L + 5.8, y: 2.55, w: 1.1, h: 0.3, fontSize: 12, color: G1 });
+  txt(s, '類似市 97', { x: L + 5.8, y: 3.25, w: 1.1, h: 0.3, fontSize: 12, color: G1 });
+  txt(s, 'みなと市 78\n（−26pt）', { x: L + 5.8, y: 4.55, w: 1.1, h: 0.6, fontSize: 12, bold: true, color: NAVY });
+  readout(s, [['2020年の落ち込みから戻っていない', '全国と類似市は2021年以降に持ち直したが、みなと市は減り続けた'],
+    ['全国との差は10年で26ptに開いた', '差の半分（12pt）は2020年以降の5年で開いた。減便が利用離れを招いている']]);
 }
 
 // ---------- P10 チャート＋キーメッセージ欄 ----------
@@ -419,7 +462,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   [['背景', '路線バス4路線の利用が10年で半減した'], ['取組', '4路線を予約型交通に切り替え、乗降地点を120か所に増やした'], ['体制', '町が運行を委託し、地元のタクシー2社が運行を担う'], ['成功の鍵', '運行前に病院と商業施設を乗降地点に組み込んだ']].forEach(([k, v], i) => {
     txt(s, k, { x: L, y, w: 1.3, h: 0.7, fontSize: 14, bold: true, color: G1, valign: 'middle' });
     txt(s, v, { x: L + 1.4, y, w: lw - 1.4, h: 0.7, fontSize: 14, valign: 'middle', bold: i === 3 });
-    if (i < 3) rowRule(s, L, y + 0.92, lw);
+    if (i < 3) rowRule(s, L, y + 0.92, lw); else band(s, L, y - 0.1, lw, 0.9);
     y += 1.1;
   });
   const rx = L + lw + 0.5, rw = R - rx;
@@ -439,13 +482,15 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     '使う場面：アンケート結果。属性別の行を横の100%積上げで。設問文・n数・調査時期を必ず記載。注目の回答だけ紺。凡例はグラフの上に1行で置く。\n差し替え：属性・回答割合・設問文。');
   const labels = ['全体', '10〜20代', '30〜40代', '50〜60代', '70代以上'].reverse();
   s.addChart(pres.charts.BAR, [
-    { name: 'そう思う', labels, values: [52, 40, 44, 50, 55].reverse() },
-    { name: 'ややそう思う', labels, values: [20, 22, 25, 22, 22].reverse() },
+    // 紺は言いたい行（70代以上の「そう思う」＋「ややそう思う」＝77%）だけ。他の行はグレーの濃淡
+    ...keyRow([[52, 40, 44, 50, 55], [20, 22, 25, 22, 22]].map(v => v.reverse()), ['そう思う', 'ややそう思う'], 0),
     { name: 'どちらでもない', labels, values: [15, 20, 17, 16, 13].reverse() },
     { name: 'そう思わない', labels, values: [13, 18, 14, 12, 10].reverse() },
-  ], Object.assign({}, chartBase, { x: L, y: 2.5, w: W, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE }));
-  const lg = [['そう思う', NAVY], ['ややそう思う', '7F7F7F'], ['どちらでもない', 'CCCCCC'], ['そう思わない', 'E0EEF8']];
-  lg.forEach(([n, c], i) => { const x = L + 1.6 + i * 2.1; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.2, h: 0.2, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.28, y: 2.12, w: 1.7, h: 0.3, fontSize: 14, color: i === 0 ? NAVY : BLACK, bold: i === 0 }); });
+  ].map(d => Object.assign({ labels }, d)), Object.assign({}, chartBase, { x: L, y: 2.5, w: W - PANEL_W - 0.25, h: 4.15, barDir: 'bar', barGrouping: 'percentStacked', barGapWidthPct: 40, chartColors: [NAVY, NAVY, '7F7F7F', 'CCCCCC', 'E0EEF8', 'F2F2F2'], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: WHITE, dataLabelFormatCode: '0;;' }));
+  const lg = [['そう思う', '7F7F7F'], ['ややそう思う', 'CCCCCC'], ['どちらでもない', 'E0EEF8'], ['そう思わない', 'F2F2F2']];
+  lg.forEach(([n, c], i) => { const x = L + 0.75 + i * 1.5; s.addShape(pres.shapes.RECTANGLE, { x, y: 2.17, w: 0.18, h: 0.18, fill: { color: c }, line: { type: 'none' } }); txt(s, n, { x: x + 0.24, y: 2.11, w: 1.35, h: 0.3, fontSize: 12 }); });
+  readout(s, [['70代以上の77%が存続を望む', '「そう思う」と「ややそう思う」の計。若い世代ほど低く、10〜20代は62%にとどまる'],
+    ['反対は全体の13%にとどまる', '存続の是非ではなく、どの形で維持するかが議論の中心になる']]);
 }
 
 // ---------- P19 提言 ----------
@@ -456,6 +501,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
     ['2　費用を抑える', [['2-1', '支線12路線を予約型交通に転換する', '2027年度', true], ['2-2', '運転士を支線から幹線へ再配置する', '2027年度', true], ['2-3', '車両の更新を小型車に切り替える', '2029年度', false]]],
     ['3　体制を整える', [['3-1', '市に交通の推進室を設ける', '2027年度', false], ['3-2', '収支と利用者数を四半期ごとに管理する', '2027年度', false]]]];
   head(s, L, 2.1, W - 1.4, '施策');
+  band(s, L + 2.65, 3.74, W - 2.65, 1.0);
   head(s, R - 1.3, 2.1, 1.3, '着手時期', { align: 'right' });
   let y = 2.62;
   groups.forEach(([g, items], gi) => {
@@ -493,7 +539,7 @@ const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s,
   });
 }
 
-const CTX = { pres, frame, txt, line, rect, head, rowRule, bullets, RULE, chartBase, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y, TOP } };
+const CTX = { pres, frame, txt, line, rect, head, rowRule, bullets, RULE, chartBase, readout, PANEL_W, band, keyRow, icon: ICON.icon, C: { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, BLUE5, L, R, W, BODY_Y, TOP } };
 require('./build_pattern_deck_more.js')(CTX);
 require('./build_pattern_deck_more2.js')(CTX);
 require('./build_pattern_deck_more3.js')(CTX);
@@ -517,6 +563,30 @@ function fixLabelColors(xml) {
     return ser.replace(/(<c:dLbls>[\s\S]*?<a:defRPr[^>]*><a:solidFill><a:srgbClr val=")[0-9A-Fa-f]{6}/, `$1${color}`);
   });
 }
+
+// 読み取り帯を置く型：本体の要素を左約3分の2に縮め、右に帯を置く（sample_readouts.js）
+function withReadout(s, blocks) {
+  const f = (W - PANEL_W - 0.25) / W, EMU = 914400;
+  s._slideObjects.slice(s.__cs).forEach(o => {
+    const op = o.options || {};
+    if (o._type === 'table') {
+      if (typeof op.x === 'number') op.x = Math.round((L + (op.x / EMU - L) * f) * EMU);
+      if (typeof op.w === 'number') op.w = Math.round(op.w * f);
+      if (Array.isArray(op.colW)) op.colW = op.colW.map(c => c * f);
+    } else {
+      const label = o._type === 'text' && Array.isArray(o.text) && o.text.length && typeof op.h === 'number' && op.h <= 0.5;
+      if (typeof op.x === 'number') op.x = L + (op.x - L) * f;
+      // 1行のラベルは幅を縮めない（折り返して2行になるのを防ぐ）。本体の右端は越えない
+      if (typeof op.w === 'number') op.w = label ? Math.max(op.w * f, Math.min(op.w, R - PANEL_W - 0.25 - op.x)) : op.w * f;
+    }
+  });
+  readout(s, blocks);
+}
+FRAMED.forEach(s => {
+  if (s.__id === 'EX') { const hit = READOUTS.EX.find(([k]) => (s.__msg || '').startsWith(k)); if (hit) withReadout(s, hit[1]); }
+  else if (READOUTS[s.__id]) withReadout(s, READOUTS[s.__id]);
+});
+if (process.env.DUMP_IDS) require('fs').writeFileSync(process.env.DUMP_IDS, FRAMED.map(s => `${s._slideNum}\t${s.__id}\t${(s.__msg || '').slice(0, 12)}`).join('\n'));
 
 ICON.flush()
   .then(() => pres.write({ outputType: 'nodebuffer' }))

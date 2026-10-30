@@ -7,7 +7,7 @@
 module.exports = function ({ pres, frame, txt, line, rect, head, rowRule, bullets, chartBase, C }) {
   const { F, NAVY, BLACK, G1, G2, G3, G4, G5, WHITE, L, R, W, BODY_Y, BLUE5 } = C;
   const num = (o) => Object.assign({ fontFace: 'Arial', fontSize: 12 }, o);   // 図の中の数値は12pt（B-2）
-  const tri = (s, x, y, w, h, color) => require('./hg_arrows.js').hgArrow(pres, s, 'triStroke', x, y, Math.min(w, h) * 1.25, { tone: color === NAVY ? 'accent' : 'gray' });
+  const tri = (s, x, y, w, h, color) => require('./mck_marks.js').cause(pres, s, x, y, Math.min(w, h) * 1.25, { key: color === NAVY });   // 因果の三角（グレーの塗りの細い三角）
   const bar = (s, x, y, w, h, color) => s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color }, line: { type: 'none' } });
 
   // ---------- P72 主張パネル＋図（各論に一覧の番号を持ち込む） ----------
