@@ -42,9 +42,10 @@ VALIGN = {"top": MSO_ANCHOR.TOP, "middle": MSO_ANCHOR.MIDDLE, "bottom": MSO_ANCH
 
 
 class Scale:
-    def __init__(self, w_px):
-        self.k = SLIDE_W / w_px  # EMU / px
-        self.pt = 960.0 / w_px   # pt / px（13.333in × 72pt）
+    def __init__(self, h_px):
+        # 高さ 7.5in（540pt）を基準にする。16:9（13.333in）も 4:3（10in）も同じ倍率になる
+        self.k = SLIDE_H / h_px  # EMU / px
+        self.pt = 540.0 / h_px   # pt / px
 
     def __call__(self, v):
         return Emu(int(round(v * self.k)))
@@ -308,9 +309,10 @@ def convert(html, out, external=False):
         if r.returncode != 0:
             sys.exit(f"html_dump.mjs 失敗: {r.stderr.strip()[:400]}")
         data = json.loads((Path(td) / "dump.json").read_text())
-        sc = Scale(data["slideW"])
+        sc = Scale(data["slideH"])
         prs = Presentation()
-        prs.slide_width, prs.slide_height = SLIDE_W, SLIDE_H
+        # 幅は HTML の縦横比から決める（16:9 → 13.333in、4:3 → 10in。slide-rules §1）
+        prs.slide_width, prs.slide_height = int(round(SLIDE_H * data["slideW"] / data["slideH"])), SLIDE_H
         blank = prs.slide_layouts[6]
         n = 0
         for s in data["slides"]:

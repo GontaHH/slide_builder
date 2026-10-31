@@ -920,8 +920,11 @@ def check_html(path):
     global STRICT_LEN
     STRICT_LEN = False
     html = Path(path).read_text(encoding="utf8", errors="ignore")
-    if not ("338.67mm" in html and "190.5mm" in html):
-        fail("16:9 サイズ（338.67mm×190.5mm）が CSS に見当たらない（A4 / 297×167 は旧仕様）")
+    global TITLE_MAX
+    four_three = bool(re.search(r"@page\s*{[^}]*size:\s*254mm\s+190\.5mm", html))
+    TITLE_MAX = 34 if four_three else 46   # メッセージ20pt で1行に入る全角の字数（4:3 は版面の幅 242.8mm。slide-rules §0.2）
+    if not (("338.67mm" in html or four_three) and "190.5mm" in html):
+        fail("16:9（338.67mm×190.5mm）か 4:3（254mm×190.5mm）のサイズが CSS に見当たらない（A4 / 297×167 は旧仕様）")
     if re.search(r"@page\s*{[^}]*297mm", html):
         fail("@page が A4 横のまま")
     for c in OLD_COLORS:

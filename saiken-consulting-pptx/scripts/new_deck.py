@@ -175,6 +175,8 @@ def main():
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--show", help="例: b09,m05（その部品の section の HTML だけを表示する）")
+    ap.add_argument("--ratio", choices=("16:9", "4:3"), default="16:9",
+                    help="スライドの比率。4:3 は 254×190.5mm（PowerPoint の標準 4:3）。高さは同じなので版面の縦の位置（slide-rules §0.2）は変わらない")
     a = ap.parse_args()
 
     base_html, more_html = read(BASE), read(MORE)
@@ -247,6 +249,11 @@ def main():
 
     base_css = scope_css(split_css(base_html), ".s", section_classes(base_html, "s"))
     more_css = scope_css(split_css(more_html), ".slide", section_classes(more_html, "slide"))
+    # 比率（slide-rules §1・§0.2）。4:3 は幅だけを変える（高さ 190.5mm・縦の位置は 16:9 と同じ）
+    w_mm, w_px = ("254mm", "1200px") if a.ratio == "4:3" else ("338.67mm", "1600px")
+    if a.ratio == "4:3":
+        base_css = base_css.replace("338.67mm", w_mm)
+        more_css = re.sub(r"--slide-w:\s*1600px", f"--slide-w: {w_px}", more_css).replace("aspect-ratio: 16 / 9", "aspect-ratio: 4 / 3")
     # :root は両方残す（色・書体は同値。追加パーツ集側は版面の余白変数も持つ）
 
     out = f"""<!DOCTYPE html>
@@ -275,8 +282,8 @@ def main():
    印刷は従来の zoom 方式のまま（transform＋1600px実レイアウトはChromeの印刷
    shrink-to-fit を誘発して全ページが縮むため、printには適用しない） */
 @media not print{{
-  .slide{{width:338.67mm;height:190.5mm;zoom:1;aspect-ratio:auto}}
-  .slide .sinner{{inset:auto;left:0;top:0;width:1600px;height:900px;
+  .slide{{width:{w_mm};height:190.5mm;zoom:1;aspect-ratio:auto}}
+  .slide .sinner{{inset:auto;left:0;top:0;width:{w_px};height:900px;
     padding:var(--margin-top) var(--margin-x) var(--margin-bottom);box-sizing:border-box;
     transform:scale(0.8);transform-origin:top left}}
 }}

@@ -22,6 +22,8 @@ slide_builder リポジトリの管理者です。元の作者の商標（社名
 | 配色 | 暖色（生成り・茶）から、墨とグレーで描き強調色 `--key` を1か所だけ使うモノトーンへ（McKinsey 型の抑制） | slide-rules §0.3、両パーツ集の `:root` |
 | 検査 | 版面の定位置のずれ・メッセージ3行以上（FAIL）、強調色の使いすぎ（WARN）を追加。メッセージの大きさの基準を 22pt → 20pt、1行の目安を 40字 → 46字に | `check_layout.mjs`（31・32）、`check_deck.py` |
 | 変換 | 列の間を空けた表（`border-spacing`）を PPTX にするとき、列の位置を HTML と揃える | `html_dump.mjs` |
+| 比率 | 4:3（254×190.5mm）を選べるようにした（`new_deck.py --ratio 4:3`）。PPTX の大きさは HTML の縦横比から決め、検査の mm 換算・文字の大きさの基準は高さで測る | `new_deck.py`・`html_to_pptx.py`・`check_layout.mjs`・`check_deck.py` |
+| 部品の不具合 | 計算ロジックの流れ（m27）の項目名が列の下に付かずスライドの下端へ流れていたのを直した。凡例＋図の見出しを並べたページで出所が定位置から外れるのを直した | 両パーツ集 |
 | 表記 | 出所・注記の見出し語を「出所）」「注）」に | 両パーツ集 |
 | 削除 | 元の作者の製品の説明（`references/jinba-context.md`）、商標ポリシー、裏表紙の制作クレジット、GitHub の設定（`.github/`） | — |
 | 見本 | `assets/` の見本 PDF・PPTX を、改変後のパーツ集から作り直した（`scripts/build_assets.py`） | `assets/` |

@@ -300,6 +300,12 @@ h1{margin:1mm 0 0 0;font-size:20pt;line-height:1.4;font-weight:400;color:var(--i
 .foot{left:5.6mm;right:5.6mm;top:174.3mm;bottom:4mm;padding:0;border-top:0;justify-content:flex-end;align-items:flex-end;font-size:9pt}
 .s:not(.cover) .foot b{display:none}  /* 本文ページのフッターはページ番号だけ（右下） */
 .cover .foot{justify-content:space-between}
+/* 本体の直下に「凡例＋図の見出し」を並べたページ: 本体の器を位置の基準にすると出所（.src）が定位置から外れるので、
+   器は基準にせず、凡例は見出しの下罫のすぐ下に右揃えで流す（見出しは②に置いたまま。§0.2・§5.18） */
+.c:has(> .legend + .axh){position:static}
+.c:has(> .legend + .axh) > *{order:3}
+.c:has(> .legend + .axh) > .axh{order:1}
+.c > .legend:has(+ .axh){order:2;position:static;align-self:flex-end;margin:-3mm 0 -2mm 0}
 /* ── 強調色は1ページ1か所（slide-rules §0.3） ── */
 .key{color:var(--key)!important}
 .key-fill{background:var(--key)!important;color:#fff!important}

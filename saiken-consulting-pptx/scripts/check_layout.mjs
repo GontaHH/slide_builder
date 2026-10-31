@@ -905,11 +905,11 @@ const { issues, warns } = await page.evaluate(() => {
     // 6. タイトルと本文の実際の大きさ（表紙・章扉・裏表紙は対象外）
     if (!std && !s.matches(".cover, .chap, .back")) {
       const ttl = s.querySelector("h1, .title, .ttl");
-      sizes.push({ n, title: ttl ? effSize(ttl) : 0, sw: sr.width, body: bodySize(s) });
+      sizes.push({ n, title: ttl ? effSize(ttl) : 0, sh: sr.height, body: bodySize(s) });
     }
-    // 31. 版面の定位置（§0.2）。位置は版面の幅 338.67mm を基準に mm へ換算して比べる（zoom・transform 込みの実寸）
+    // 31. 版面の定位置（§0.2）。位置は版面の高さ 190.5mm を基準に mm へ換算して比べる（16:9・4:3 共通。zoom・transform 込みの実寸）
     if (!std && !s.matches(".cover, .chap, .back")) {
-      const mm = sr.width / 338.67;
+      const mm = sr.height / 190.5;
       const at = (r) => (r.top - sr.top) / mm;
       const ttl = s.querySelector("h1, .title, .ttl");
       const box = s.querySelector(":scope .c, :scope .sinner > .content");
@@ -994,8 +994,8 @@ const { issues, warns } = await page.evaluate(() => {
   for (const x of sizes) {
     if (mt && x.title && Math.abs(x.title / mt - 1) > 0.04)
       out.push(`p${x.n}: タイトルの実際の大きさが他のページの ${Math.round((x.title / mt) * 100)}%（パーツ集の混在で縮小がかかっていない可能性。§4・追加パーツ集は .slide の zoom ごと持ち込む）`);
-    // §0.2・§2.1: タイトル（メッセージ）は 20pt（版面の幅 338.67mm に対して 7.06mm）。空きを埋めるために大きくしない・1行に収めるために小さくしない
-    const tr = x.title && x.sw ? x.title / x.sw / (20 * 25.4 / 72 / 338.67) : 0;
+    // §0.2・§2.1: タイトル（メッセージ）は 20pt（版面の高さ 190.5mm に対して 7.06mm。16:9・4:3 共通）。空きを埋めるために大きくしない・1行に収めるために小さくしない
+    const tr = x.title && x.sh ? x.title / x.sh / (20 * 25.4 / 72 / 190.5) : 0;
     if (tr && Math.abs(tr - 1) > 0.1)
       out.push(`p${x.n}: タイトル（メッセージ）の大きさが既定の20ptの ${Math.round(tr * 100)}%（§0.2: メッセージは20pt・2行まで。空きを埋めるために大きくしない・1行に収めるために小さくしない）`);
     if (mb && x.body && Math.abs(x.body / mb - 1) > 0.15)

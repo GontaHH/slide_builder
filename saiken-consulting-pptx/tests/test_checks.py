@@ -1743,3 +1743,33 @@ class PptxAppendixAndAxisNames(unittest.TestCase):
     def test_named_corner_passes(self):
         fails = self._check(self._deck(("部門ごとに承認待ちの日数を比べる", None, (True, True, self.ROWS))))
         self.assertFalse(any("§4.102" in f for f in fails), fails)
+
+
+@unittest.skipUnless(_has_playwright(), "npm run setup で playwright を入れると実行される")
+class Ratio43(unittest.TestCase):
+    """new_deck.py --ratio 4:3（254×190.5mm）: 版面の縦の位置は 16:9 と同じ（§0.2）。check_deck はサイズを受け付け、1行の目安を34字にする"""
+
+    def build(self, d, ratio):
+        out = Path(d) / f"deck_{ratio.replace(':', '')}.html"
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "new_deck.py"), "--ratio", ratio, "--parts", "b01,b09:axb,m05,b10",
+                        "--title", "比率の確認", "-o", str(out)], check=True, capture_output=True, cwd=ROOT)
+        return out
+
+    def test_four_three_frame_passes(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = self.build(d, "4:3")
+            html = p.read_text(encoding="utf8")
+            self.assertIn("254mm", html)
+            r = subprocess.run(["node", str(ROOT / "scripts" / "check_layout.mjs"), str(p)], capture_output=True, text=True, cwd=ROOT)
+            fails = [l for l in r.stdout.splitlines() if l.startswith("FAIL")]
+            self.assertFalse([l for l in fails if "版面の定位置" in l or "はみ出し" in l or "既定の20pt" in l], fails)
+            r = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_deck.py"), "--template", str(p)], capture_output=True, text=True, cwd=ROOT)
+            self.assertNotIn("サイズが CSS に見当たらない", r.stdout)
+
+    def test_four_three_title_length(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = self.build(d, "4:3")
+            html = p.read_text(encoding="utf8").replace("<h1>軸のある表</h1>", "<h1>上下分離は、鉄道の運行を続けながら沿線自治体の年間負担を現行の3分の2に抑えられる</h1>", 1)
+            p.write_text(html, encoding="utf8")
+            r = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_deck.py"), str(p)], capture_output=True, text=True, cwd=ROOT)
+            self.assertIn("2行になる想定", r.stdout)   # 34字超（16:9 の46字では WARN にならない長さ）
