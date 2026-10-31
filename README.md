@@ -28,6 +28,7 @@ Claude のスキル **consulting-slide-builder**（スライド作成）と **sl
 | `docs/icons.md` | アイコン集：70種の一覧と使い方の決まり |
 | `docs/workflow.md` | スキルの処理の流れ（何を入力に、どのファイルの何を参照し、何をするか） |
 | `catalog/catalog.xlsx` | 公開資料の収集候補とページ台帳（書誌情報・URL・学べる点のみ） |
+| `saiken-consulting-pptx/` | 別系統のスライド作成スキル（そのまま Claude のスキルとして使えるフォルダ）。carnot-tech/jinba-consulting-pptx-skill（MIT）の規約・部品・検査をそのまま使い、版面（スライドメッセージ・スライドタイトル・エビデンス・出所の位置と幅・高さ）を本リポジトリ B-1 の NRI の骨格に、配色を「墨とグレー＋強調色1か所」に差し替えたもの。HTML（16:9）で組み、PDF・PPTX に書き出す。詳細は同フォルダの README.md・NOTICE.md |
 | `CHANGELOG.md` | ルール・型の変更履歴 |
 
 ## 入れないもの
